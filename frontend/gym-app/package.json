@@ -1,0 +1,16 @@
+{
+  "name": "quasar-app-extension-n",
+  "version": "0.0.1",
+  "description": "App for gymbros",
+  "author": "TomCZQ <thomasdevpro38@gmail.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0"
+  },
+  "engines": {
+    "node": ">= 12.2.0",
+    "npm": ">= 5.6.0",
+    "yarn": ">= 1.6.0"
+  }
+}
