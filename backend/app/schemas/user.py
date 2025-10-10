@@ -33,16 +33,15 @@ class UserOut(BaseModel):
     email: str
     gender: Gender
     birthdate: datetime
-    height_cm: Optional[int]
-    weight_kg: Optional[float]
-    body_fat_percentage: Optional[float]
-    activity_level: ActivityLevel
-    goal: Goal
+    height_cm: Optional[int] = None
+    weight_kg: Optional[float] = None
+    body_fat_percentage: Optional[float] = None
+    activity_level: Optional[ActivityLevel] = None
+    goal: Optional[Goal] = None
     created_at: datetime
     updated_at: datetime
-
-class Config:
-    from_attributes = True
+    class Config:
+        from_attributes = True
 
 class UserList(BaseModel):
     users: list[UserOut]
