@@ -32,7 +32,7 @@ def get_workouts(session: Session, offset: int = 0, limit: int = 100, user_id: O
     if user_id:
         query = query.where(Workout.user_id == user_id)
     workouts = session.exec(query).all()
-    return [WorkoutOut.from_orm(w) for w in workouts]
+    return [WorkoutOut.model_validate(w) for w in workouts]
 
 def update_workout(workout_id: int, workout_update: WorkoutUpdate, session: Session) -> Optional[WorkoutOut]:
     workout = session.get(Workout, workout_id)

@@ -1,9 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.database.db import get_session
 from app.crud.user import create_user, get_user, get_users, update_user, delete_user
+from app.crud.user_exercise_log import get_user_exercise_logs
 from app.schemas.user import UserCreate, UserList, UserOut, UserUpdate
+from app.schemas.user_exercise_log import UserExerciseLogOut
 
 router = APIRouter()
 
@@ -40,3 +42,8 @@ def delete_existing_user(user_id: int, session: Session = Depends(get_session)):
     if not deleted:
         raise HTTPException(status_code=404, detail="User not found")
     return None  # 204 = OK, no content
+
+@router.get("/{user_id}/logs", response_model=List[UserExerciseLogOut])
+def read_user_logs(user_id: int, offset: int = 0, limit: int = 100, exercise_id: Optional[int] = None, session: Session = Depends(get_session)):
+    logs = get_user_exercise_logs(session, user_id, offset, limit, exercise_id)  # <--- Session premier
+    return logs

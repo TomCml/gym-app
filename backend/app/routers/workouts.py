@@ -3,8 +3,11 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from app.database.db import get_session
 from app.crud.workouts import create_workout, get_workout, get_workouts, update_workout, delete_workout
-from app.schemas.workouts import WorkoutCreate, WorkoutUpdate, WorkoutOut, WorkoutList, WorkoutExercise
-from app.schemas.workout_exercises import WorkoutExerciseCreate, WorkoutExerciseUpdate, WorkoutExerciseOut, AddExercisesToWorkout  # <--- AJOUT COMPLET
+from app.crud.user_exercise_log import get_user_exercise_logs, add_logs_to_workout
+from app.schemas.workouts import WorkoutCreate, WorkoutUpdate, WorkoutOut, WorkoutList,  Workout
+from app.schemas.workout_exercises import WorkoutExerciseOut, AddExercisesToWorkout 
+from app.schemas.user_exercise_log import UserExerciseLogOut, AddLogsToWorkout
+
 
 router = APIRouter()
 
@@ -54,3 +57,22 @@ def get_workout_exercises(workout_id: int, session: Session = Depends(get_sessio
     if not exercises:
         raise HTTPException(status_code=404, detail="No exercises for this workout")
     return exercises
+
+@router.post("/{workout_id}/logs", response_model=List[UserExerciseLogOut])
+def add_logs_to_workout_endpoint(workout_id: int, user_id: int, data: AddLogsToWorkout, session: Session = Depends(get_session)):
+    try:
+        return add_logs_to_workout(user_id, workout_id, data, session)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{workout_id}/logs", response_model=List[UserExerciseLogOut])
+def read_workout_logs(workout_id: int, session: Session = Depends(get_session)):
+    workout = session.get(Workout, workout_id)
+    if not workout:
+        raise HTTPException(status_code=404, detail="Workout not found")
+    logs = get_user_exercise_logs(
+        session=session,  
+        user_id=workout.user_id,  
+        workout_id=workout_id  
+    )
+    return logs
