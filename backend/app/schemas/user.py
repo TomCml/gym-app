@@ -46,3 +46,6 @@ class UserOut(BaseModel):
 class UserList(BaseModel):
     users: list[UserOut]
     total: int
+
+class TokenData(BaseModel):
+    user_id: Optional[int] = None    

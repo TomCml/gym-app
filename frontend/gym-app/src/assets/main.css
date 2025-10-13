@@ -1,0 +1,19 @@
+/* src/assets/main.css */
+
+:root {
+  /* --variable-name: value; */
+  --color-background: #101922;
+  --color-accent: #1173d4;
+  --complementary-color: #f5a623;
+
+  /* You can add other global variables here */
+  --font-family-main: Arial, sans-serif;
+  --color-text: #ffffff;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-family-main);
+}

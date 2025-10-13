@@ -5,6 +5,8 @@ from app.database.db import get_session
 from app.models.base import WorkoutExercise, Workout, Exercise
 from app.schemas.workout_exercises import WorkoutExerciseCreate, WorkoutExerciseUpdate, WorkoutExerciseOut, AddExercisesToWorkout  # <--- AJOUT COMPLET
 
+# Fichier : app/crud/workout_exercises.py
+
 def create_workout_exercise(exercise_in: WorkoutExerciseCreate, workout_id: int, session: Session) -> WorkoutExerciseOut:
 
     workout = session.get(Workout, workout_id)
@@ -14,18 +16,16 @@ def create_workout_exercise(exercise_in: WorkoutExerciseCreate, workout_id: int,
     if not exercise:
         raise ValueError("Exercise not found")
 
+    exercise_data = exercise_in.model_dump(exclude_unset=True)
+
     db_exercise = WorkoutExercise(
         workout_id=workout_id,
-        exercise_id=exercise_in.exercise_id,
-        planned_sets=exercise_in.planned_sets,
-        planned_reps=exercise_in.planned_reps,
-        planned_weight=exercise_in.planned_weight,
-        rest_seconds=exercise_in.rest_seconds,
-        notes=exercise_in.notes
+        **exercise_data  
     )
+    
     session.add(db_exercise)
     session.commit()
-    session.refresh(db_exercise)  # Charge relations
+    session.refresh(db_exercise)
     return WorkoutExerciseOut.model_validate(db_exercise)
 
 def add_exercises_to_workout(workout_id: int, exercises_data: AddExercisesToWorkout, session: Session) -> List[WorkoutExerciseOut]:

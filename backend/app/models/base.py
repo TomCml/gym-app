@@ -1,7 +1,5 @@
-from typing import Optional
 from enum import Enum  
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy import ForeignKey  
 from datetime import datetime
 from typing import Optional, List 
 
