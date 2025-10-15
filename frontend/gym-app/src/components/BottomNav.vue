@@ -14,10 +14,10 @@
       <div>Workouts</div>
     </router-link>
 
-    <router-link to="/" class="nav-item">
-      <div class="icon circle">
+    <router-link to="/" class="nav-item circle">
+      <div class="play">
         <font-awesome-icon icon="fa-solid fa-circle-play" />
-        <div>Start</div>
+        <div></div>
       </div>
     </router-link>
 
@@ -51,6 +51,7 @@
   padding: 10px 0;
   border-top: 1px solid #333;
   z-index: 1000;
+  opacity: 0.95;
 }
 
 .circle {
@@ -65,16 +66,21 @@
   justify-content: center;
   color: #888;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 14px;
+  font-weight: 600;
   width: 50px;
 }
 
 .nav-item .icon {
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 4px;
 }
 
 .router-link-exact-active {
   color: var(--color-accent);
+}
+
+.play {
+  font-size: 32px;
 }
 </style>

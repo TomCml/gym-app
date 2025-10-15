@@ -1,4 +1,3 @@
-<!-- src/views/Profile.vue (simple user info) -->
 <template>
   <div class="profile">
     <h2>Profile</h2>

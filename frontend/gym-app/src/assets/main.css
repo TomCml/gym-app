@@ -7,7 +7,8 @@
   --complementary-color: #f5a623;
 
   /* You can add other global variables here */
-  --font-family-main: Arial, sans-serif;
+  --font-family-main: 'Quicksand', sans-serif;
+  --font-family-secondary: 'Bungee', 'sans-serif';
   --color-text: #ffffff;
 }
 

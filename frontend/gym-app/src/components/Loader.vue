@@ -1,6 +1,6 @@
 <template>
   <div v-if="show" class="loader-overlay">
-    <img :src="plateIcon" alt="Loading..." class="spinner" />
+    <font-awesome-icon icon="fa-solid fa-dumbbell" class="spinner" />
   </div>
 </template>
 
@@ -35,6 +35,7 @@ defineProps({
 .spinner {
   width: 80px;
   height: 80px;
+  color: var(--complementary-color);
 
   animation: spin 1.5s linear infinite;
 }

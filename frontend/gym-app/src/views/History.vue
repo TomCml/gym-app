@@ -56,6 +56,10 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+h2 {
+  font-family: Bungee;
+  font-weight: 300;
+}
 .history {
   padding: 20px;
   color: #fff;

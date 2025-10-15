@@ -50,9 +50,13 @@ const formatDisplayDate = (isoDate) => {
 </script>
 
 <style scoped>
+h2 {
+  font-family: Bungee;
+  font-weight: 300;
+}
 .workouts-container {
   padding: 20px;
-  color: white;
+  color: var(--complementary-color);
   background-color: #101922;
   max-width: 800px;
   margin: auto;
@@ -64,6 +68,8 @@ const formatDisplayDate = (isoDate) => {
   margin-bottom: 20px;
 }
 .new-workout-btn {
+  font-family: Quicksand;
+  font-weight: 600;
   background: #4a90e2;
   color: #fff;
   padding: 10px 20px;

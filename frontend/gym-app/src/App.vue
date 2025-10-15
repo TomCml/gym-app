@@ -11,7 +11,6 @@
 </template>
 
 <script setup>
-// Ton script existant
 import { RouterView } from 'vue-router'
 import { useAuthStore } from './stores/auth'
 import BottomNav from './components/BottomNav.vue'
@@ -20,11 +19,10 @@ const authStore = useAuthStore()
 
 <style>
 .app {
-  max-width: 375px; /* Mobile-first, iPhone size */
+  max-width: 430px;
   margin: 0 auto;
-  background: #1e1e1e; /* Dark mode from maquettes */
+  background: var(--background-color);
   color: #fff;
-  min-height: 100vh;
-  font-family: Arial, sans-serif;
+  font-family: 'Quicksand', sans-serif;
 }
 </style>

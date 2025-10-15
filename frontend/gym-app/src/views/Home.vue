@@ -1,10 +1,16 @@
 <!-- src/views/Home.vue (welcome screen maquette 1) -->
 <template>
   <div class="home">
-    <div class="header-bg">
-      <img vbind :src="homePicture" alt="Woman working out" class="illustration" />
+    <div class="title">
+      <font-awesome-icon icon="fa-solid fa-dumbbell" />
+      <h1>Gymbro App</h1>
+      <font-awesome-icon icon="fa-solid fa-dumbbell" />
     </div>
-    <h1>Welcome {{ user.username }}</h1>
+
+    <div class="header-bg">
+      <img vbind :src="homePicture" alt="gym equipements" class="illustration" />
+    </div>
+    <h2>Welcome {{ user.username }}</h2>
     <p>Track your workouts, set goals, and stay motivated on your fitness journey.</p>
     <button class="get-started" @click="getStarted">Get Started</button>
   </div>
@@ -28,6 +34,26 @@ const getStarted = () => {
 </script>
 
 <style scoped>
+h1 {
+  font-size: 40px;
+  font-family: Bungee;
+  color: var(--complementary-color);
+}
+
+h2 {
+  font-family: Bungee;
+  font-weight: 300;
+  color: var(--complementary-color);
+}
+.title {
+  font-size: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  color: var(--color-accent);
+  gap: 8px;
+}
+
 .home {
   background: var(--background-color);
 
@@ -35,18 +61,16 @@ const getStarted = () => {
   padding: 20px;
 }
 .header-bg {
-  background: #f5a623;
-  padding: 50px 0;
+  background: var(--background-color);
+  padding: 10px 0;
   margin: 0;
   margin-bottom: 20px;
 }
 .illustration {
-  width: 400px;
+  width: 380px;
+  border: solid 2px var(--complementary-color);
 }
-h1 {
-  font-size: 28px;
-  color: #fff;
-}
+
 p {
   font-size: 16px;
   color: #888;
@@ -57,7 +81,13 @@ p {
   padding: 15px 30px;
   border: none;
   border-radius: 30px;
+  font-family: Quicksand;
+  font-weight: 800;
   font-size: 18px;
-  margin-top: 20px;
+  margin-top: 10px;
+}
+
+.get-started :hover {
+  scale: 1.05;
 }
 </style>
