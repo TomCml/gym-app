@@ -1,4 +1,3 @@
-<!-- src/views/Home.vue (welcome screen maquette 1) -->
 <template>
   <div class="home">
     <div class="title">
@@ -85,9 +84,11 @@ p {
   font-weight: 800;
   font-size: 18px;
   margin-top: 10px;
+  transition: ease-in-out 0.1s;
 }
 
-.get-started :hover {
+.get-started:hover {
   scale: 1.05;
+  transform: translateY(-2px);
 }
 </style>

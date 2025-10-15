@@ -1,7 +1,12 @@
 <template>
+  <div class="title">
+    <font-awesome-icon icon="fa-solid fa-dumbbell" />
+    <h1>Gymbro App</h1>
+    <font-awesome-icon icon="fa-solid fa-dumbbell" />
+  </div>
   <div class="login-container">
     <h2>{{ isLogin ? 'Login' : 'Sign Up' }}</h2>
-    <form @submit.prevent="handleSubmit">
+    <form @submit.prevent="handleSubmit" class="login-form">
       <input v-if="!isLogin" v-model="form.username" type="text" placeholder="Username" required />
       <input v-model="form.email" type="email" placeholder="Email" required />
       <input v-model="form.password" type="password" placeholder="Password" required />
@@ -66,12 +71,20 @@ const handleSubmit = async () => {
   background: #333;
   border-radius: 10px;
   color: #fff;
+  justify-content: center;
+  align-items: center;
 }
+
+.login-form {
+  text-align: center;
+}
+
 h2 {
+  font-family: Bungee;
   text-align: center;
 }
 input {
-  width: 100%;
+  width: 93%;
   padding: 10px;
   margin: 10px 0;
   border: 1px solid #555;
@@ -80,24 +93,44 @@ input {
   border-radius: 5px;
 }
 button {
-  width: 100%;
-  padding: 10px;
-  background: #4a90e2;
+  background: var(--color-accent);
   color: #fff;
+  padding: 15px 30px;
   border: none;
   border-radius: 5px;
-  margin: 10px 0;
+  font-family: Quicksand;
+  font-weight: 800;
+  font-size: 18px;
+  margin-top: 10px;
 }
 .switch {
   text-align: center;
+  font-weight: 400;
 }
 .switch span {
   color: #4a90e2;
   cursor: pointer;
   text-decoration: underline;
+  font-weight: 400;
 }
 .error {
   color: #ff6b6b;
   text-align: center;
+}
+
+h1 {
+  font-size: 40px;
+  font-family: Bungee;
+  color: var(--complementary-color);
+}
+
+.title {
+  font-size: 40px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent);
+  gap: 8px;
 }
 </style>

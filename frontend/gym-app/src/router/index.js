@@ -7,6 +7,7 @@ import Workouts from '../views/Workouts.vue'
 import NewWorkout from '../views/NewWorkout.vue'
 import History from '../views/History.vue'
 import Profile from '../views/Profile.vue'
+import WorkoutEdit from '../views/WorkoutEdit.vue'
 
 const routes = [
   {
@@ -27,6 +28,15 @@ const routes = [
     component: NewWorkout,
     meta: { requiresAuth: true },
   },
+
+  {
+    path: '/workouts/edit/:id',
+    name: 'workout-edit',
+    component: WorkoutEdit,
+    props: true,
+    meta: { requiresAuth: true },
+  },
+
   { path: '/history', name: 'history', component: History, meta: { requiresAuth: true } },
   { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
 

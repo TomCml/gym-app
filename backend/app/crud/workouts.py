@@ -4,6 +4,9 @@ from sqlalchemy.orm import Session
 from app.database.db import get_session
 from app.models.base import Workout, User  # User pour check FK
 from app.schemas.workouts import WorkoutCreate, WorkoutUpdate, WorkoutOut
+from .workout_exercises import WorkoutExerciseCreate
+from app.models.base import Workout, WorkoutExercise 
+from sqlmodel import select, delete  
 
 def create_workout(workout_in: WorkoutCreate, session: Session) -> WorkoutOut:
     owner = session.get(User, workout_in.user_id)
@@ -48,16 +51,40 @@ def get_workouts(
     return workouts_out, total
 
 def update_workout(workout_id: int, workout_update: WorkoutUpdate, session: Session) -> Optional[WorkoutOut]:
-    workout = session.get(Workout, workout_id)
-    if not workout:
+    db_workout = session.get(Workout, workout_id)
+    if not db_workout:
         return None
-    update_data = workout_update.dict(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(workout, field, value)
-    session.add(workout)
+
+    # On extrait les données du payload. exclude_unset=True est important.
+    update_data = workout_update.model_dump(exclude_unset=True)
+
+    # 1. Gérer la mise à jour des exercices, s'ils sont fournis
+    if "exercises" in update_data:
+        new_exercises_data = update_data.pop("exercises") # On les retire pour le traitement
+
+        # a. Supprimer tous les anciens exercices liés à ce workout
+        delete_statement = delete(WorkoutExercise).where(WorkoutExercise.workout_id == workout_id)
+        session.exec(delete_statement)
+
+        # b. Ajouter les nouveaux exercices
+        for exercise_in in new_exercises_data:
+            # On peut utiliser model_validate pour convertir le dict en Pydantic model si besoin
+            ex_model = WorkoutExerciseCreate.model_validate(exercise_in)
+            db_exercise = WorkoutExercise(
+                workout_id=workout_id,
+                **ex_model.model_dump()
+            )
+            session.add(db_exercise)
+
+    # 2. Mettre à jour les champs simples du workout (name, notes, etc.)
+    for key, value in update_data.items():
+        setattr(db_workout, key, value)
+    
+    session.add(db_workout)
     session.commit()
-    session.refresh(workout)
-    return WorkoutOut.model_validate(workout)
+    session.refresh(db_workout)
+    
+    return WorkoutOut.model_validate(db_workout)
 
 def delete_workout(workout_id: int, session: Session) -> bool:
     workout = session.get(Workout, workout_id)

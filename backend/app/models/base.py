@@ -129,6 +129,7 @@ class Workout(SQLModel, table=True):
     name: str = Field(sa_column_kwargs={"nullable": False})
     date: datetime = Field(sa_column_kwargs={"server_default": "now()"})
     notes: Optional[str] = None
+    day_of_week: Optional[str] = None
 
     # Relations
     user: "User" = Relationship(back_populates="workouts")

@@ -2,26 +2,33 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 from app.models.base import Workout, User, WorkoutExercise, Exercise  # Relations
+from app.schemas.workout_exercises import WorkoutExerciseOut, WorkoutExerciseCreate
 
 class WorkoutCreate(BaseModel):
     name: str
     date: Optional[datetime] = None
     notes: Optional[str] = None
+    day_of_week: Optional[int] = None
     user_id: int  
 
 class WorkoutUpdate(BaseModel):
     name: Optional[str] = None
     date: Optional[datetime] = None
     notes: Optional[str] = None
+    day_of_week: Optional[int] = None
+
+    exercises: Optional[List[WorkoutExerciseCreate]] = None
+
 
 class WorkoutOut(BaseModel):
     id: int
     name: str
     date: datetime
     notes: Optional[str]
+    day_of_week: Optional[int] = None
     user_id: int
     user: User  
-    workout_exercises: List[WorkoutExercise]  
+    workout_exercises: List[WorkoutExerciseOut]  
 
     class Config:
         from_attributes = True
