@@ -21,12 +21,17 @@ const routes = [
     name: 'login',
     component: Login,
   },
-  { path: '/workouts', name: 'workouts', component: Workouts, meta: { requiresAuth: true } },
+  {
+    path: '/workouts',
+    name: 'workouts',
+    component: Workouts,
+    meta: { requiresAuth: true },
+  },
   {
     path: '/new-workout',
     name: 'new-workout',
     component: NewWorkout,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, transition: 'slide-up' },
   },
 
   {
@@ -34,11 +39,21 @@ const routes = [
     name: 'workout-edit',
     component: WorkoutEdit,
     props: true,
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, transition: 'slide-up' },
   },
 
-  { path: '/history', name: 'history', component: History, meta: { requiresAuth: true } },
-  { path: '/profile', name: 'profile', component: Profile, meta: { requiresAuth: true } },
+  {
+    path: '/history',
+    name: 'history',
+    component: History,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/profile',
+    name: 'profile',
+    component: Profile,
+    meta: { requiresAuth: true },
+  },
 
   { path: '/', redirect: '/login' },
 

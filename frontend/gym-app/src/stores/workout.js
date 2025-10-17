@@ -60,6 +60,7 @@ export const useWorkoutStore = defineStore('workout', () => {
       const workoutPayload = {
         name: workoutData.name,
         user_id: authStore.user.id,
+        day_of_week: workoutData.day_of_week,
       }
       const workoutResponse = await axios.post(WORKOUTS_API_URL, workoutPayload)
       const newWorkout = workoutResponse.data
@@ -67,7 +68,7 @@ export const useWorkoutStore = defineStore('workout', () => {
       if (workoutData.exercises.length > 0) {
         const exercisesPayload = {
           exercises: workoutData.exercises.map((ex) => ({
-            exercise_id: ex.id,
+            exercise_id: ex.exercise.id,
             planned_sets: ex.planned_sets,
             planned_reps: ex.planned_reps,
             planned_weight: ex.planned_weight,
@@ -86,14 +87,14 @@ export const useWorkoutStore = defineStore('workout', () => {
   }
 
   async function updateWorkout(payload) {
-    // This destructuring defines the 'day_of_week' constant for this function's scope.
     const { id, name, exercises, day_of_week } = payload
     try {
       const updatePayload = {
         name: name,
         day_of_week: day_of_week,
         exercises: exercises.map((ex) => ({
-          exercise_id: ex.exercise_id || ex.id,
+          exercise_id: ex.exercise.id,
+
           planned_sets: ex.planned_sets,
           planned_reps: ex.planned_reps,
           planned_weight: ex.planned_weight,
@@ -106,8 +107,18 @@ export const useWorkoutStore = defineStore('workout', () => {
 
       return { success: true }
     } catch (error) {
-      console.error('Error updating workout:', error)
-      return { success: false, message: error.response?.data?.detail || 'Update failed' }
+      console.error('Error updating workout:', error.response?.data)
+      return { success: false, message: error.response?.data?.detail?.[0]?.msg || 'Update failed' }
+    }
+  }
+
+  async function deleteWorkout(id) {
+    try {
+      await axios.delete(`${WORKOUTS_API_URL}/${id}`)
+      return { success: true }
+    } catch (error) {
+      console.error('Error deleting workout:', error)
+      return { success: false, message: 'Delete failed' }
     }
   }
 
@@ -119,5 +130,6 @@ export const useWorkoutStore = defineStore('workout', () => {
     fetchWorkout,
     createWorkout,
     updateWorkout,
+    deleteWorkout,
   }
 })

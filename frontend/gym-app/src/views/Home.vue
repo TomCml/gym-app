@@ -2,7 +2,7 @@
   <div class="home">
     <div class="title">
       <font-awesome-icon icon="fa-solid fa-dumbbell" />
-      <h1>Gymbro App</h1>
+      <h1>Jymbro</h1>
       <font-awesome-icon icon="fa-solid fa-dumbbell" />
     </div>
 
@@ -49,8 +49,9 @@ h2 {
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   color: var(--color-accent);
-  gap: 8px;
+  gap: 15px;
 }
 
 .home {

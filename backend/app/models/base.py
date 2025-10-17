@@ -125,7 +125,7 @@ class Exercise(SQLModel, table=True):
 class Workout(SQLModel, table=True):
     __tablename__ = "workouts"
     id: Optional[int] = Field(default=None, primary_key=True)
-    user_id: int = Field(foreign_key="users.id", ondelete="CASCADE")  # FK + CASCADE
+    user_id: int = Field(foreign_key="users.id") 
     name: str = Field(sa_column_kwargs={"nullable": False})
     date: datetime = Field(sa_column_kwargs={"server_default": "now()"})
     notes: Optional[str] = None
@@ -133,8 +133,14 @@ class Workout(SQLModel, table=True):
 
     # Relations
     user: "User" = Relationship(back_populates="workouts")
-    workout_exercises: List["WorkoutExercise"] = Relationship(back_populates="workout")
-    logs: List["UserExerciseLog"] = Relationship(back_populates="workout")
+    workout_exercises: List["WorkoutExercise"] = Relationship(
+        back_populates="workout",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    logs: List["UserExerciseLog"] = Relationship(
+        back_populates="workout",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
 
 class WorkoutExercise(SQLModel, table=True):
     __tablename__ = "workout_exercises"

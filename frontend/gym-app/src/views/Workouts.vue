@@ -130,6 +130,7 @@ h2 {
 }
 .workout-date {
   color: #bbb;
+  font-size: 12px;
 }
 
 .workout-exercises {

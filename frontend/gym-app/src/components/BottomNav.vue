@@ -21,11 +21,11 @@
       </div>
     </router-link>
 
-    <router-link to="/history" class="nav-item">
+    <router-link to="/stats" class="nav-item">
       <div class="icon">
-        <font-awesome-icon icon="fa-solid fa-list" />
+        <font-awesome-icon icon="fa-solid fa-square-poll-vertical" />
       </div>
-      <div>History</div>
+      <div>Stats</div>
     </router-link>
 
     <router-link to="/profile" class="nav-item">
