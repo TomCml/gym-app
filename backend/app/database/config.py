@@ -1,29 +1,23 @@
-import os
-from pathlib import Path
-from pydantic import BaseModel
-from dotenv import load_dotenv
+# Fichier: app/database/config.py (ou où que soit ton config.py)
 
-project_root = Path(__file__).resolve().parent.parent.parent.parent
-load_dotenv()
+# 1. On importe depuis pydantic_settings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List
 
-print(f"DB_USER: {os.environ.get('POSTGRES_USER')}")
-print(f"DB_HOST: {os.environ.get('POSTGRES_HOST')}")
-print(f"DB_NAME: {os.environ.get('POSTGRES_DB')}")
-
-class Settings(BaseModel):
+class Settings(BaseSettings):
+    """
+    Pydantic lit automatiquement les variables d'environnement
+    et celles du fichier .env pour remplir ces champs.
+    """
     PROJECT_NAME: str = "GymApp"
     API_PREFIX: str = "/api"
 
-    DB_USER: str = os.environ["POSTGRES_USER"]
-    DB_PASSWORD: str = os.environ["POSTGRES_PASSWORD"]
-    DB_HOST: str = os.environ["POSTGRES_HOST"]
-    DB_PORT: str = os.environ["POSTGRES_PORT"]
-    DB_NAME: str = os.environ["POSTGRES_DB"]
+    DATABASE_URL: str
+    
+    SECRET_KEY: str
 
-    SQLALCHEMY_DATABASE_URI: str = (
-        f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD.replace('@', '%40')}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
+    ALLOW_ORIGINS: List[str] 
 
-    ALLOW_ORIGINS: list[str] = os.getenv("ALLOW_ORIGINS", "*").split(",")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()
