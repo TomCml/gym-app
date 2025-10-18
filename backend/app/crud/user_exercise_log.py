@@ -7,7 +7,6 @@ from app.models.base import UserExerciseLog, User, Exercise, Workout
 from app.schemas.user_exercise_log import UserExerciseLogCreate, UserExerciseLogUpdate, UserExerciseLogOut, AddLogsToWorkout
 
 def create_user_exercise_log(log_in: UserExerciseLogCreate, session: Session) -> UserExerciseLogOut:
-    # Check FKs
     user = session.get(User, log_in.user_id)  # Assumé user_id toujours fourni
     if not user:
         raise ValueError("User not found")
@@ -19,8 +18,7 @@ def create_user_exercise_log(log_in: UserExerciseLogCreate, session: Session) ->
         if not workout:
             raise ValueError("Workout not found")
 
-    # Calcul volume si pas fourni (bonus)
-    volume = log_in.volume or (log_in.reps * log_in.weight or 0)  # Simple calc
+    volume = log_in.volume or (log_in.reps * log_in.weight or 0)  
 
     db_log = UserExerciseLog(
         user_id=log_in.user_id,
@@ -44,7 +42,7 @@ def create_user_exercise_log(log_in: UserExerciseLogCreate, session: Session) ->
 def add_logs_to_workout(session: Session, user_id: int, workout_id: Optional[int], logs_data: AddLogsToWorkout ) -> List[UserExerciseLogOut]:
     added = []
     for log_in in logs_data.logs:
-        log_in.user_id = user_id  # Force user_id (from auth future)
+        log_in.user_id = user_id  
         log_in.workout_id = workout_id
         added.append(create_user_exercise_log(log_in, session))
     return added
@@ -75,3 +73,11 @@ def delete_user_exercise_log(session: Session, log_id: int) -> bool:
     session.delete(log)
     session.commit()
     return True
+
+def create_log(log_in: UserExerciseLogCreate, user_id: int, session: Session) -> UserExerciseLogOut:
+    log_data = log_in.model_dump()
+    db_log = UserExerciseLog(**log_data, user_id=user_id)
+    session.add(db_log)
+    session.commit()
+    session.refresh(db_log)
+    return UserExerciseLogOut.model_validate(db_log)

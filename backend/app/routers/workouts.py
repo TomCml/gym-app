@@ -1,15 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from sqlalchemy.orm import Session
+from datetime import datetime
 from app.database.db import get_session
-from app.models.base import Workout # Importez le modèle pour le get_workout_logs
-
-# 👇 1. MODIFICATION DE L'IMPORT : On importe les modules avec des alias
+from app.models.base import Workout 
 from app.crud import workouts as crud_workouts
 from app.crud import workout_exercises as crud_workout_exercises
 from app.crud import user_exercise_log as crud_user_exercise_log
-
-# Vos imports de schémas restent les mêmes
 from app.schemas.workouts import WorkoutCreate, WorkoutUpdate, WorkoutOut, WorkoutList
 from app.schemas.workout_exercises import WorkoutExerciseOut, AddExercisesToWorkout 
 from app.schemas.user_exercise_log import UserExerciseLogOut, AddLogsToWorkout
@@ -80,3 +77,9 @@ def read_workout_logs(workout_id: int, session: Session = Depends(get_session)):
         workout_id=workout_id
     )
     return logs
+
+@router.get("/today/", response_model=Optional[WorkoutOut])
+def get_todays_workout_for_user(user_id: int, session: Session = Depends(get_session)):
+    """Récupère le workout planifié pour le jour actuel pour un utilisateur."""
+    day_of_week = datetime.today().isoweekday() # Lundi = 1, ..., Dimanche = 7
+    return crud_workouts.get_workout_for_day(user_id=user_id, day_of_week=day_of_week, session=session)

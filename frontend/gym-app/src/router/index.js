@@ -8,6 +8,7 @@ import NewWorkout from '../views/NewWorkout.vue'
 import History from '../views/History.vue'
 import Profile from '../views/Profile.vue'
 import WorkoutEdit from '../views/WorkoutEdit.vue'
+import LiveWorkout from '../views/LiveWorkout.vue'
 
 const routes = [
   {
@@ -63,6 +64,12 @@ const routes = [
       const authStore = useAuthStore()
       return authStore.isAuthenticated ? '/home' : '/login'
     },
+  },
+  {
+    path: '/liveworkout:id',
+    name: 'liveworkout',
+    component: LiveWorkout,
+    meta: { requiresAuth: true },
   },
 ]
 

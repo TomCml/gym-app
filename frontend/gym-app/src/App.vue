@@ -20,9 +20,13 @@ const authStore = useAuthStore()
 </script>
 
 <style>
+body {
+  max-width: 100vw;
+  max-height: 100vh;
+}
 .app {
-  max-width: 430px;
-  margin: 0 auto;
+  max-width: 100vw;
+  margin: 0;
   background-color: var(--color-background);
   color: #fff;
   font-family: 'Quicksand', sans-serif;
@@ -35,8 +39,8 @@ main {
 }
 
 main {
-  flex-grow: 1; /* Fait en sorte que <main> prenne toute la hauteur disponible */
+  flex-grow: 1;
   padding-bottom: 80px;
-  background-color: var(--color-background); /* Assure que le fond ne "flashe" pas */
+  background-color: var(--color-background);
 }
 </style>

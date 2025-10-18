@@ -5,8 +5,8 @@
         <h4>{{ title }}</h4>
         <p>{{ message }}</p>
         <div class="modal-actions">
-          <button class="btn-secondary" @click="$emit('close')">Non</button>
-          <button class="btn-danger" @click="$emit('confirm')">Oui</button>
+          <button class="btn-secondary" @click="$emit('close')">No</button>
+          <button class="btn-danger" @click="$emit('confirm')">Yes</button>
         </div>
       </div>
     </div>
@@ -44,7 +44,7 @@ defineEmits(['close', 'confirm'])
 }
 
 .modal-content {
-  background-color: #2a2a2a;
+  background-color: var(--color-background);
   padding: 25px;
   border-radius: 12px;
   width: 90%;
@@ -55,6 +55,9 @@ defineEmits(['close', 'confirm'])
 h4 {
   margin-top: 0;
   font-size: 18px;
+  font-family: Bungee;
+  font-weight: 400;
+  color: var(--complementary-color);
 }
 
 p {
@@ -79,11 +82,13 @@ p {
 .btn-secondary {
   background-color: #555;
   color: #fff;
+  width: 20vw;
 }
 
 .btn-danger {
   background-color: #e53e3e;
   color: #fff;
+  width: 20vw;
 }
 
 .fade-enter-active,

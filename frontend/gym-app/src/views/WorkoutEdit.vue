@@ -4,6 +4,9 @@
       <div class="header">
         <button @click="router.back()" class="close-btn">✕</button>
         <h2>Edit Workout</h2>
+        <button class="delete-button" @click="isDeleteModalVisible = true">
+          <font-awesome-icon icon="fa-solid fa-trash" />
+        </button>
       </div>
 
       <Loader :show="workoutStore.isLoading" />
@@ -26,15 +29,73 @@
             <option :value="7">Sunday</option>
           </select>
         </div>
-        <div class="form-group exercise-group"></div>
+
+        <div class="form-group exercise-group">
+          <label>Exercises</label>
+          <ul class="added-exercises-list">
+            <li
+              v-for="(exercise, index) in addedExercises"
+              :key="exercise.id || index"
+              class="exercise-item"
+            >
+              <div class="exercise-header">
+                <span>{{ exercise.exercise ? exercise.exercise.name : exercise.name }}</span>
+                <button @click="removeExercise(index)" class="remove-btn">−</button>
+              </div>
+              <div class="exercise-details">
+                <div class="detail-input">
+                  <label>Sets</label>
+                  <input type="number" v-model.number="exercise.planned_sets" />
+                </div>
+                <div class="detail-input">
+                  <label>Reps</label>
+                  <input type="number" v-model.number="exercise.planned_reps" />
+                </div>
+                <div class="detail-input">
+                  <label>Weight (kg)</label>
+                  <input type="number" step="0.5" v-model.number="exercise.planned_weight" />
+                </div>
+                <div class="detail-input">
+                  <label>Rest (s)</label>
+                  <input type="number" step="5" v-model.number="exercise.rest_seconds" />
+                </div>
+              </div>
+              <div class="notes-input">
+                <input type="text" v-model="exercise.notes" placeholder="Add notes..." />
+              </div>
+            </li>
+          </ul>
+
+          <div class="search-container">
+            <input
+              v-model="searchQuery"
+              placeholder="Add Exercise"
+              class="input-field search-input"
+              @input="debouncedSearch"
+              @focus="isSearchActive = true"
+            />
+            <span class="search-icon">⊕</span>
+            <ul
+              v-if="isSearchActive && (exerciseStore.isLoading || searchResults.length)"
+              class="search-results"
+            >
+              <li v-if="exerciseStore.isLoading" class="loading-item">Searching...</li>
+              <li
+                v-for="result in searchResults"
+                :key="result.id"
+                @click="addExercise(result)"
+                class="result-item"
+              >
+                {{ result.name }}
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
-      <div class="footer">
+      <div class="footer" v-if="!workoutStore.isLoading && currentWorkout">
         <div class="footer-buttons">
-          <button class="delete-button" @click="isDeleteModalVisible = true">Delete</button>
-          <button class="save-button" @click="handleUpdate" :disabled="!isFormValid">
-            Update Workout
-          </button>
+          <button class="save-button" @click="handleUpdate" :disabled="!isFormValid">Update</button>
         </div>
         <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
       </div>
@@ -43,7 +104,7 @@
     <ConfirmationModal
       :show="isDeleteModalVisible"
       title="Delete Workout"
-      message="Are you sure you want to delete this workout? This action cannot be undone."
+      message="Are you sure you want to delete this workout?"
       @close="isDeleteModalVisible = false"
       @confirm="handleDeleteConfirm"
     />
@@ -51,6 +112,7 @@
 </template>
 
 <script setup>
+// Le script est correct et reste inchangé
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -73,14 +135,13 @@ const exerciseStore = useExerciseStore()
 const { searchResults } = storeToRefs(exerciseStore)
 const { currentWorkout } = storeToRefs(workoutStore)
 
-// State local
 const workoutName = ref('')
 const dayOfWeek = ref(null)
 const addedExercises = ref([])
 const searchQuery = ref('')
 const isSearchActive = ref(false)
 const errorMessage = ref('')
-const isDeleteModalVisible = ref(false) // 👈 MODIFICATION : État pour la modale
+const isDeleteModalVisible = ref(false)
 
 onMounted(() => {
   workoutStore.fetchWorkout(props.id)
@@ -409,7 +470,7 @@ select.input-field {
   color: #fff;
   padding: 0;
   border: none;
-  width: 50vw;
+  width: 20vw;
   height: 4vh;
   border-radius: 30px;
   font-size: 16px;
@@ -433,20 +494,24 @@ select.input-field {
 }
 
 .delete-button {
-  background-color: #e53e3e; /* Rouge pour danger/suppression */
+  background-color: #e53e3e;
   font-family: Quicksand, sans-serif;
   font-weight: 500;
   color: #fff;
   padding: 0;
   border: none;
-  width: 30vw; /* Largeur plus petite */
+  width: 15vw;
   height: 4vh;
   border-radius: 30px;
   font-size: 16px;
   cursor: pointer;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .save-button {
-  flex-grow: 1; /* Le bouton de sauvegarde prend le reste de l'espace */
+  flex-grow: 1;
 }
 </style>

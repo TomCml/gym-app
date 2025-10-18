@@ -1,6 +1,7 @@
 from typing import List, Optional, Tuple
 from sqlmodel import select, func
 from sqlalchemy.orm import Session
+from datetime import datetime 
 from app.database.db import get_session
 from app.models.base import Workout, User  # User pour check FK
 from app.schemas.workouts import WorkoutCreate, WorkoutUpdate, WorkoutOut
@@ -85,6 +86,17 @@ def update_workout(workout_id: int, workout_update: WorkoutUpdate, session: Sess
     session.refresh(db_workout)
     
     return WorkoutOut.model_validate(db_workout)
+
+
+def get_workout_for_day(user_id: int, day_of_week: int, session: Session) -> Optional[WorkoutOut]:
+    """Récupère le premier workout planifié pour un jour donné."""
+    workout_db = session.exec(
+        select(Workout).where(Workout.user_id == user_id, Workout.day_of_week == day_of_week)
+    ).first()
+    
+    if workout_db:
+        return WorkoutOut.model_validate(workout_db)
+    return None
 
 def delete_workout(workout_id: int, session: Session) -> bool:
     workout = session.get(Workout, workout_id)

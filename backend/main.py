@@ -2,12 +2,11 @@ import sys
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
-
-# Tes imports existants
 from app.database.config import settings
 from app.routers.users import router as users_router
 from app.routers.exercises import router as exercises_router
 from app.routers.workouts import router as workouts_router
+from app.routers import logs as logs_router
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -15,7 +14,6 @@ app = FastAPI(title=settings.PROJECT_NAME)
 
 
 # --------------------------------------------------------------------------
-# Liste des "origines" autorisées à faire des requêtes
 origins = [
     "http://localhost:5173",  # L'adresse par défaut de Vite
     "http://localhost:5174",  # Une autre adresse possible pour Vite
@@ -34,7 +32,7 @@ app.add_middleware(
 def root():
     return {"message": "Server running"}
 
-# Tes routes existantes. Le préfixe est correct.
 app.include_router(users_router, prefix="/api/users", tags=["users"])
 app.include_router(exercises_router, prefix="/api/exercises", tags=["exercises"])
 app.include_router(workouts_router, prefix="/api/workouts", tags=["workouts"])
+app.include_router(logs_router.router, prefix="/api/logs", tags=["logs"])

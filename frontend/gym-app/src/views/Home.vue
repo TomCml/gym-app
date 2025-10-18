@@ -67,7 +67,7 @@ h2 {
   margin-bottom: 20px;
 }
 .illustration {
-  width: 380px;
+  width: 80vw;
   border: solid 2px var(--complementary-color);
 }
 

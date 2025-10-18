@@ -11,14 +11,13 @@
       <div>
         <ul v-if="workouts.length > 0 && !isLoading" class="workouts-list">
           <li v-for="workout in workouts" :key="workout.id" @click="goToWorkoutEdit(workout.id)">
-            <div>
+            <div class="name-date">
               <div class="workout-name">{{ workout.name }}</div>
-
-              <div v-if="workout.workout_exercises.length" class="workout-exercises">
-                {{ workout.workout_exercises.map((we) => we.exercise.name).join(', ') }}
-              </div>
+              <div class="workout-date">{{ formatDisplayDate(workout.date) }}</div>
             </div>
-            <div class="workout-date">{{ formatDisplayDate(workout.date) }}</div>
+            <div v-if="workout.workout_exercises.length" class="workout-exercises">
+              {{ workout.workout_exercises.map((we) => we.exercise.name).join(', ') }}
+            </div>
           </li>
         </ul>
 
@@ -50,7 +49,6 @@ const goToNewWorkout = () => {
 }
 
 const goToWorkoutEdit = (workoutId) => {
-  // On pointe vers la route d'édition qu'on a créée
   router.push(`/workouts/edit/${workoutId}`)
 }
 
@@ -69,6 +67,7 @@ const formatDisplayDate = (isoDate) => {
 h2 {
   font-family: Bungee;
   font-weight: 300;
+  font-size: 28px;
 }
 .workouts-container {
   padding: 20px;
@@ -110,9 +109,10 @@ h2 {
 }
 .workouts-list li {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
-  align-items: flex-start;
   background: #333;
+  height: 12vh;
   padding: 15px 20px;
   margin: 10px 0;
   border-radius: 8px;
@@ -125,6 +125,7 @@ h2 {
   scale: 1.05;
 }
 .workout-name {
+  font-size: 20px;
   font-weight: bold;
   margin-bottom: 5px;
 }
@@ -133,11 +134,17 @@ h2 {
   font-size: 12px;
 }
 
+.name-date {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
 .workout-exercises {
   font-size: 13px;
   color: #aaa;
   font-style: italic;
-  max-width: 250px;
+  max-width: 80vw;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

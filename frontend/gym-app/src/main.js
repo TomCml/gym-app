@@ -11,14 +11,29 @@ import {
   faDumbbell,
   faCirclePlay,
   faSquarePollVertical,
+  faTrash,
+  faTrophy,
 } from '@fortawesome/free-solid-svg-icons'
 import { faHouse, faUser } from '@fortawesome/free-regular-svg-icons'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 
-library.add(faHouse, faDumbbell, faList, faUser, faCirclePlay, faSquarePollVertical)
+library.add(
+  faHouse,
+  faDumbbell,
+  faList,
+  faUser,
+  faCirclePlay,
+  faSquarePollVertical,
+  faTrash,
+  faTrophy,
+)
 
 const app = createApp(App)
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
 
 app.use(createPinia())
+app.use(pinia)
 app.use(router)
 app.component('Loader', loader)
 app.component('font-awesome-icon', FontAwesomeIcon)
