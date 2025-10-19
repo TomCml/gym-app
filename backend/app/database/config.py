@@ -13,14 +13,8 @@ class Settings(BaseSettings):
     
     SECRET_KEY: str
 
-    ALLOW_ORIGINS: List[str] 
-    @field_validator('ALLOW_ORIGINS', mode='before')
-    @classmethod
-    def _split_str(cls, v):
-        if isinstance(v, str):
-            return [item.strip() for item in v.split(',') if item.strip()]
-        return v
-
+    ALLOW_ORIGINS: str
+    
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 settings = Settings()
