@@ -112,7 +112,7 @@ h2 {
   flex-direction: column;
   justify-content: space-between;
   background: #333;
-  height: 12vh;
+  min-height: 10vh;
   padding: 15px 20px;
   margin: 10px 0;
   border-radius: 8px;
@@ -145,9 +145,8 @@ h2 {
   color: #aaa;
   font-style: italic;
   max-width: 80vw;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 
 .workout-date {

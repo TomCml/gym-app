@@ -41,17 +41,12 @@
 
 <style scoped>
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: flex;
   justify-content: space-around;
   background-color: var(--color-background);
   padding: 10px 0;
   border-top: 1px solid #333;
-  z-index: 1000;
-  opacity: 0.95;
+  flex-shrink: 0;
 }
 
 .circle {

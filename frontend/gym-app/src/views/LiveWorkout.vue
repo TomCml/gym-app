@@ -86,9 +86,7 @@ const nextSetIndex = computed(() => {
 })
 
 onMounted(() => {
-  if (status.value !== 'exercising' && status.value !== 'resting') {
-    liveWorkoutStore.fetchTodaysWorkout()
-  }
+  liveWorkoutStore.validateTodaysWorkout()
 })
 
 watch(
@@ -116,7 +114,7 @@ const handleRestFinished = () => {
   const logData = {
     exercise_id: currentExercise.value.exercise.id,
     workout_id: workout.value.id,
-    set_number: currentSetIndex.value + 1, // La série qu'on vient de finir
+    set_number: currentSetIndex.value + 1,
     reps: currentLog.value.reps,
     weight: currentLog.value.weight,
   }
@@ -143,7 +141,7 @@ const finishAndGoHome = () => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: calc(100vh - 120px); /* Hauteur moins header et nav */
+  height: 100%;
 }
 
 .content-view {
@@ -201,7 +199,7 @@ const finishAndGoHome = () => {
 
 .inputs-container {
   display: flex;
-  flex-direction: column; /* Place les groupes l'un au-dessus de l'autre */
+  flex-direction: column;
   align-items: center;
   gap: 25px;
   margin: 20px 0;

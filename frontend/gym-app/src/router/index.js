@@ -9,6 +9,7 @@ import History from '../views/History.vue'
 import Profile from '../views/Profile.vue'
 import WorkoutEdit from '../views/WorkoutEdit.vue'
 import LiveWorkout from '../views/LiveWorkout.vue'
+import Stats from '../views/Stats.vue'
 
 const routes = [
   {
@@ -34,7 +35,12 @@ const routes = [
     component: NewWorkout,
     meta: { requiresAuth: true, transition: 'slide-up' },
   },
-
+  {
+    path: '/Stats',
+    name: 'Stats',
+    component: Stats,
+    meta: { requiresAuth: true },
+  },
   {
     path: '/workouts/edit/:id',
     name: 'workout-edit',

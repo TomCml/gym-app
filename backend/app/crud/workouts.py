@@ -89,7 +89,6 @@ def update_workout(workout_id: int, workout_update: WorkoutUpdate, session: Sess
 
 
 def get_workout_for_day(user_id: int, day_of_week: int, session: Session) -> Optional[WorkoutOut]:
-    """Récupère le premier workout planifié pour un jour donné."""
     workout_db = session.exec(
         select(Workout).where(Workout.user_id == user_id, Workout.day_of_week == day_of_week)
     ).first()

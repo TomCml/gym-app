@@ -34,10 +34,22 @@ export const api = {
   getCurrentUser() {
     return apiClient.get('/api/users/me')
   },
+  updateCurrentUser(userData) {
+    return apiClient.put('/api/users/me', userData)
+  },
+  changePassword(currentPassword, newPassword) {
+    return apiClient.put('/api/users/me/password', {
+      current_password: currentPassword,
+      new_password: newPassword,
+    })
+  },
 
   // --- Workouts ---
   fetchWorkouts(userId) {
     return apiClient.get('/api/workouts/', { params: { user_id: userId } })
+  },
+  fetchTodaysWorkout(userId) {
+    return apiClient.get('/api/workouts/today/', { params: { user_id: userId } })
   },
   fetchWorkout(id) {
     return apiClient.get(`/api/workouts/${id}`)

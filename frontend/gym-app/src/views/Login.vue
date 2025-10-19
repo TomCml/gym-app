@@ -47,7 +47,7 @@ const form = reactive({
   password: '',
   username: '',
   birthdate: '',
-  gender: 'male', // Valeur par défaut
+  gender: 'male', 
 })
 const error = ref('')
 const isLogin = ref(true)

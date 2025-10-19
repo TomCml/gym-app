@@ -80,6 +80,5 @@ def read_workout_logs(workout_id: int, session: Session = Depends(get_session)):
 
 @router.get("/today/", response_model=Optional[WorkoutOut])
 def get_todays_workout_for_user(user_id: int, session: Session = Depends(get_session)):
-    """Récupère le workout planifié pour le jour actuel pour un utilisateur."""
     day_of_week = datetime.today().isoweekday() # Lundi = 1, ..., Dimanche = 7
     return crud_workouts.get_workout_for_day(user_id=user_id, day_of_week=day_of_week, session=session)

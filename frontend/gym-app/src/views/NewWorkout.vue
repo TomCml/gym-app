@@ -1,17 +1,3 @@
-This is the exact same data structure inconsistency we fixed for the "Edit" page, but it's now
-happening on your "New Workout" page. Your component NewWorkout.vue is creating "flat" exercise
-objects, but your Pinia store action createWorkout now expects "nested" objects to be consistent.
-L'Explication In NewWorkout.vue, your addExercise function looks like this: JavaScript // Incorrect
-addedExercises.value.push({ ...exercise, // Creates a FLAT object like { id: 1, name: 'Squat', ... }
-planned_sets: 3, // ... }) But in stores/workout.js, your createWorkout function expects a nested
-object to find the ID: JavaScript // Correctly expects a NESTED object exercises:
-workoutData.exercises.map(ex => ({ exercise_id: ex.exercise.id, // Tries to access ex.exercise,
-which is undefined on a flat object //... })) When the store action receives the flat object,
-ex.exercise is undefined, so ex.exercise.id fails, and the exercise_id is never added to the
-payload, resulting in the 422 validation error. La Solution We need to make NewWorkout.vue
-consistent with the rest of the application by using the nested data structure. Here is the
-complete, corrected code for your NewWorkout.vue file. Extrait de code
-
 <template>
   <div>
     <Loader :show="exerciseStore.isLoading" />
@@ -192,7 +178,7 @@ const saveWorkout = async () => {
   font-family: 'Quicksand', sans-serif;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px);
+  height: 100%;
   background-color: var(--color-background);
   color: #fff;
 }

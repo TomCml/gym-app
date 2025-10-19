@@ -25,22 +25,23 @@ body {
   max-height: 100vh;
 }
 .app {
-  max-width: 100vw;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
   background-color: var(--color-background);
   color: #fff;
   font-family: 'Quicksand', sans-serif;
-  min-height: 100vh;
+  position: relative;
+}
+
+main {
+  flex-grow: 1;
+  overflow-y: auto;
   position: relative;
 }
 
 main {
   padding-bottom: 80px;
-}
-
-main {
-  flex-grow: 1;
-  padding-bottom: 80px;
-  background-color: var(--color-background);
 }
 </style>

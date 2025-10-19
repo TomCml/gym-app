@@ -1,31 +1,41 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
-from enum import Enum 
 from datetime import datetime
-from app.models.base import Gender, ActivityLevel, Goal  
+from ..models.base import Gender, ActivityLevel, Goal
+
+
+class PasswordChange(BaseModel):
+    current_password: str = Field(min_length=8, description="Current password")
+    new_password: str = Field(
+        min_length=8, description="New password must be at least 8 characters"
+    )
+
 
 class UserCreate(BaseModel):
     username: str
     email: EmailStr
-    password: str = Field(min_length=8, description="Password must be at least 8 characters")
+    password: str = Field(
+        min_length=8, description="Password must be at least 8 characters"
+    )
     gender: Gender
     birthdate: datetime
-    height_cm: Optional[Optional[int]]= None
-    weight_kg: Optional[Optional[float]] = None
-    body_fat_percentage: Optional[Optional[float]] = None
-    activity_level: Optional[Optional[ActivityLevel]] = None
-    goal: Optional[Optional[Goal]]= None
+    height_cm: int | None = None
+    weight_kg: float | None = None
+    body_fat_percentage: float | None = None
+    activity_level: ActivityLevel | None = None
+    goal: Goal | None = None
+
 
 class UserUpdate(BaseModel):
     username: str
     email: EmailStr
     gender: Gender
     birthdate: datetime
-    height_cm: Optional[Optional[int]]= None
-    weight_kg: Optional[Optional[float]] = None
-    body_fat_percentage: Optional[Optional[float]] = None
-    activity_level: Optional[Optional[ActivityLevel]] = None
-    goal: Optional[Optional[Goal]]= None
+    height_cm: int | None = None
+    weight_kg: float | None = None
+    body_fat_percentage: float | None = None
+    activity_level: ActivityLevel | None = None
+    goal: Goal | None = None
+
 
 class UserOut(BaseModel):
     id: int
@@ -33,19 +43,22 @@ class UserOut(BaseModel):
     email: str
     gender: Gender
     birthdate: datetime
-    height_cm: Optional[int] = None
-    weight_kg: Optional[float] = None
-    body_fat_percentage: Optional[float] = None
-    activity_level: Optional[ActivityLevel] = None
-    goal: Optional[Goal] = None
+    height_cm: int | None = None
+    weight_kg: float | None = None
+    body_fat_percentage: float | None = None
+    activity_level: ActivityLevel | None = None
+    goal: Goal | None = None
     created_at: datetime
     updated_at: datetime
+
     class Config:
         from_attributes = True
+
 
 class UserList(BaseModel):
     users: list[UserOut]
     total: int
 
+
 class TokenData(BaseModel):
-    user_id: Optional[int] = None    
+    user_id: int | None = None

@@ -7,7 +7,7 @@ export const useLiveWorkoutStore = defineStore(
   'liveWorkout',
   () => {
     const workout = ref(null)
-    const status = ref('idle') // 'idle', 'exercising', 'resting', 'finished'
+    const status = ref('idle')
     const currentExerciseIndex = ref(0)
     const currentSetIndex = ref(0)
     const restTimer = ref(0)
@@ -25,7 +25,13 @@ export const useLiveWorkoutStore = defineStore(
         workout.value = response.data
         status.value = 'idle'
       } catch (e) {
-        status.value = 'error'
+        console.error("Failed to fetch today's workout:", e)
+        if (e.response && e.response.status === 404) {
+          status.value = 'idle'
+        } else {
+          status.value = 'error'
+        }
+        workout.value = null
       }
     }
 
@@ -72,6 +78,30 @@ export const useLiveWorkoutStore = defineStore(
       }
     }
 
+    async function validateTodaysWorkout() {
+      if (status.value === 'exercising' || status.value === 'resting') {
+        return
+      }
+
+      const authStore = useAuthStore()
+      let freshWorkout = null
+      try {
+        const response = await api.fetchTodaysWorkout(authStore.user.id)
+        freshWorkout = response.data
+      } catch (e) {
+        console.error('No fresh workout for today or API error.', e)
+      }
+
+      const persistedWorkoutId = workout.value?.id
+      const freshWorkoutId = freshWorkout?.id
+
+      if (persistedWorkoutId !== freshWorkoutId) {
+        console.log('Workout state is stale. Resetting.')
+        stopWorkout()
+        workout.value = freshWorkout
+      }
+    }
+
     function stopWorkout() {
       clearInterval(timerInterval)
       workout.value = null
@@ -89,6 +119,7 @@ export const useLiveWorkoutStore = defineStore(
       startRest,
       saveLogAndContinue,
       stopWorkout,
+      validateTodaysWorkout,
     }
   },
   {

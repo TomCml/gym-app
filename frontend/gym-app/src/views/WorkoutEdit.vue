@@ -221,7 +221,7 @@ const handleDeleteConfirm = async () => {
   font-family: 'Quicksand', sans-serif;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px);
+  height: 100%;
   background-color: var(--color-background);
   color: #fff;
 }
