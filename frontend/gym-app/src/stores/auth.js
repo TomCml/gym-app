@@ -1,7 +1,5 @@
 import { defineStore } from 'pinia'
-import axios from 'axios'
-
-const API_URL = 'http://localhost:8000/api/users'
+import { api } from '@/services/api'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -15,21 +13,12 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     async login(credentials) {
-      const params = new URLSearchParams()
-      params.append('username', credentials.email)
-      params.append('password', credentials.password)
-
       try {
-        const response = await axios.post(`${API_URL}/login`, params)
-
+        const response = await api.login(credentials.email, credentials.password)
         this.token = response.data.access_token
         this.user = response.data.user
-
         localStorage.setItem('token', this.token)
         localStorage.setItem('user', JSON.stringify(this.user))
-
-        axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
-
         return { success: true }
       } catch (error) {
         console.error('Login failed:', error.response?.data)
@@ -39,7 +28,7 @@ export const useAuthStore = defineStore('auth', {
 
     async register(userData) {
       try {
-        await axios.post(API_URL + '/', userData)
+        await api.register(userData)
 
         return await this.login({ email: userData.email, password: userData.password })
       } catch (error) {
@@ -53,7 +42,6 @@ export const useAuthStore = defineStore('auth', {
       this.user = null
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      delete axios.defaults.headers.common['Authorization']
     },
   },
 })

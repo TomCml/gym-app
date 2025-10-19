@@ -1,11 +1,7 @@
-// src/stores/workout.js
-
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
+import { api } from '@/services/api'
 import { useAuthStore } from './auth'
-
-const WORKOUTS_API_URL = 'http://localhost:8000/api/workouts'
 
 export const useWorkoutStore = defineStore('workout', () => {
   // --- STATE ---
@@ -26,9 +22,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     }
 
     try {
-      const response = await axios.get(WORKOUTS_API_URL, {
-        params: { user_id: authStore.user.id },
-      })
+      const response = await api.fetchWorkouts(authStore.user.id)
       workouts.value = response.data.workouts
     } catch (error) {
       console.error('Error fetching workouts:', error)
@@ -41,7 +35,7 @@ export const useWorkoutStore = defineStore('workout', () => {
     isLoading.value = true
     currentWorkout.value = null
     try {
-      const response = await axios.get(`${WORKOUTS_API_URL}/${id}`)
+      const response = await api.fetchWorkout(id)
       currentWorkout.value = response.data
     } catch (error) {
       console.error(`Error fetching workout ${id}:`, error)
@@ -62,7 +56,7 @@ export const useWorkoutStore = defineStore('workout', () => {
         user_id: authStore.user.id,
         day_of_week: workoutData.day_of_week,
       }
-      const workoutResponse = await axios.post(WORKOUTS_API_URL, workoutPayload)
+      const workoutResponse = await api.createWorkout(workoutPayload)
       const newWorkout = workoutResponse.data
 
       if (workoutData.exercises.length > 0) {
@@ -76,7 +70,7 @@ export const useWorkoutStore = defineStore('workout', () => {
             notes: ex.notes,
           })),
         }
-        await axios.post(`${WORKOUTS_API_URL}/${newWorkout.id}/exercises`, exercisesPayload)
+        await api.addExercisesToWorkout(newWorkout.id, exercisesPayload)
       }
 
       return { success: true, newWorkoutId: newWorkout.id }
@@ -94,7 +88,6 @@ export const useWorkoutStore = defineStore('workout', () => {
         day_of_week: day_of_week,
         exercises: exercises.map((ex) => ({
           exercise_id: ex.exercise.id,
-
           planned_sets: ex.planned_sets,
           planned_reps: ex.planned_reps,
           planned_weight: ex.planned_weight,
@@ -103,7 +96,7 @@ export const useWorkoutStore = defineStore('workout', () => {
         })),
       }
 
-      await axios.put(`${WORKOUTS_API_URL}/${id}`, updatePayload)
+      await api.updateWorkout(id, updatePayload)
 
       return { success: true }
     } catch (error) {
@@ -114,7 +107,7 @@ export const useWorkoutStore = defineStore('workout', () => {
 
   async function deleteWorkout(id) {
     try {
-      await axios.delete(`${WORKOUTS_API_URL}/${id}`)
+      await api.deleteWorkout(id)
       return { success: true }
     } catch (error) {
       console.error('Error deleting workout:', error)

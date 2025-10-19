@@ -1,10 +1,6 @@
-// src/stores/exercise.js
-
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import axios from 'axios'
-
-const EXERCISES_API_URL = 'http://localhost:8000/api/exercises'
+import { api } from '@/services/api'
 
 export const useExerciseStore = defineStore('exercise', () => {
   // --- STATE ---
@@ -19,7 +15,7 @@ export const useExerciseStore = defineStore('exercise', () => {
     }
     isLoading.value = true
     try {
-      const response = await axios.get(`${EXERCISES_API_URL}/search/${query}`)
+      const response = await api.searchExercises(query)
       searchResults.value = response.data
     } catch (error) {
       console.error('Error searching exercises:', error)

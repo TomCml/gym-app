@@ -9,13 +9,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
-
+import { api } from '@/services/api'
 const user = ref({})
 
 onMounted(async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/users/me')
+    const response = await api.getCurrentUser()
     user.value = response.data
   } catch (err) {
     console.error('Error fetching profile', err)

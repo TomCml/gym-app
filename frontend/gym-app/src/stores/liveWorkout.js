@@ -1,8 +1,6 @@
-// src/stores/liveWorkout.js
-
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import axios from 'axios'
+import { api } from '@/services/api'
 import { useAuthStore } from './auth'
 
 export const useLiveWorkoutStore = defineStore(
@@ -23,9 +21,7 @@ export const useLiveWorkoutStore = defineStore(
       status.value = 'loading'
       const authStore = useAuthStore()
       try {
-        const response = await axios.get(`http://localhost:8000/api/workouts/today/`, {
-          params: { user_id: authStore.user.id },
-        })
+        const response = await api.fetchTodaysWorkout(authStore.user.id)
         workout.value = response.data
         status.value = 'idle'
       } catch (e) {
@@ -56,9 +52,7 @@ export const useLiveWorkoutStore = defineStore(
     async function saveLogAndContinue(setData) {
       const authStore = useAuthStore()
       try {
-        await axios.post(`http://localhost:8000/api/logs/`, setData, {
-          params: { user_id: authStore.user.id },
-        })
+        await api.createLog(authStore.user.id, setData)
       } catch (e) {
         console.error('Failed to save log', e)
       }

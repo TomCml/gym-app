@@ -1,21 +1,40 @@
 <template>
-  <div class="title">
-    <font-awesome-icon icon="fa-solid fa-dumbbell" />
-    <h1>Gymbro App</h1>
-    <font-awesome-icon icon="fa-solid fa-dumbbell" />
-  </div>
-  <div class="login-container">
-    <h2>{{ isLogin ? 'Login' : 'Sign Up' }}</h2>
-    <form @submit.prevent="handleSubmit" class="login-form">
-      <input v-if="!isLogin" v-model="form.username" type="text" placeholder="Username" required />
-      <input v-model="form.email" type="email" placeholder="Email" required />
-      <input v-model="form.password" type="password" placeholder="Password" required />
-      <button type="submit">{{ isLogin ? 'Login' : 'Sign Up' }}</button>
-      <p class="switch">
-        or <span @click="toggleMode">{{ isLogin ? 'Sign Up' : 'Login' }}</span>
-      </p>
-    </form>
-    <p v-if="error" class="error">{{ error }}</p>
+  <div>
+    <div class="title">
+      <font-awesome-icon icon="fa-solid fa-dumbbell" />
+      <h1>Gymbro App</h1>
+      <font-awesome-icon icon="fa-solid fa-dumbbell" />
+    </div>
+    <div class="login-container">
+      <h2>{{ isLogin ? 'Login' : 'Sign Up' }}</h2>
+      <form @submit.prevent="handleSubmit" class="login-form">
+        <!-- Champs pour l'inscription -->
+        <div v-if="!isLogin" class="signup-fields">
+          <input v-model="form.username" type="text" placeholder="Username" required />
+
+          <!-- 👇 CHAMP AJOUTÉ : Date de naissance 👇 -->
+          <label for="birthdate">Birthdate</label>
+          <input id="birthdate" v-model="form.birthdate" type="date" required />
+
+          <!-- 👇 CHAMP AJOUTÉ : Genre 👇 -->
+          <label for="gender">Gender</label>
+          <select id="gender" v-model="form.gender" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+
+        <!-- Champs communs -->
+        <input v-model="form.email" type="email" placeholder="Email" required />
+        <input v-model="form.password" type="password" placeholder="Password" required />
+
+        <button type="submit">{{ isLogin ? 'Login' : 'Sign Up' }}</button>
+        <p class="switch">
+          or <span @click="toggleMode">{{ isLogin ? 'Sign Up' : 'Login' }}</span>
+        </p>
+      </form>
+      <p v-if="error" class="error">{{ error }}</p>
+    </div>
   </div>
 </template>
 
@@ -27,7 +46,14 @@ import { useAuthStore } from '../stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-const form = reactive({ email: '', password: '', username: '' })
+// On ajoute les nouveaux champs au formulaire
+const form = reactive({
+  email: '',
+  password: '',
+  username: '',
+  birthdate: '',
+  gender: 'male', // Valeur par défaut
+})
 const error = ref('')
 const isLogin = ref(true)
 
@@ -37,6 +63,8 @@ const toggleMode = () => {
   form.email = ''
   form.password = ''
   form.username = ''
+  form.birthdate = ''
+  form.gender = 'male'
 }
 
 const handleSubmit = async () => {
@@ -50,6 +78,8 @@ const handleSubmit = async () => {
       username: form.username,
       email: form.email,
       password: form.password,
+      birthdate: form.birthdate,
+      gender: form.gender,
     }
     result = await authStore.register(userData)
   }
@@ -65,14 +95,11 @@ const handleSubmit = async () => {
 <style scoped>
 .login-container {
   max-width: 300px;
-  margin: 50px auto;
-  margin-top: 50px;
+  margin: 30px auto;
   padding: 20px;
   background: #333;
   border-radius: 10px;
   color: #fff;
-  justify-content: center;
-  align-items: center;
 }
 
 .login-form {
@@ -83,16 +110,33 @@ h2 {
   font-family: Bungee;
   text-align: center;
 }
-input {
-  width: 93%;
+
+.signup-fields {
+  display: flex;
+  flex-direction: column;
+}
+.signup-fields label {
+  text-align: left;
+  font-size: 12px;
+  color: #aaa;
+  margin-top: 10px;
+  margin-left: 5px;
+}
+
+input,
+select {
+  width: 100%;
   padding: 10px;
-  margin: 10px 0;
+  margin-top: 5px;
   border: 1px solid #555;
   background: #444;
   color: #fff;
   border-radius: 5px;
+  box-sizing: border-box; /* Assure une taille cohérente */
 }
+
 button {
+  width: 100%;
   background: var(--color-accent);
   color: #fff;
   padding: 15px 30px;
@@ -101,18 +145,21 @@ button {
   font-family: Quicksand;
   font-weight: 800;
   font-size: 18px;
-  margin-top: 10px;
+  margin-top: 20px;
+  cursor: pointer;
 }
+
 .switch {
   text-align: center;
   font-weight: 400;
+  margin-top: 15px;
 }
 .switch span {
-  color: #4a90e2;
+  color: var(--color-accent);
   cursor: pointer;
   text-decoration: underline;
-  font-weight: 400;
 }
+
 .error {
   color: #ff6b6b;
   text-align: center;
@@ -132,5 +179,6 @@ h1 {
   justify-content: center;
   color: var(--color-accent);
   gap: 8px;
+  margin-top: 30px;
 }
 </style>
