@@ -10,6 +10,7 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+import sqlmodel 
 
 # revision identifiers, used by Alembic.
 revision: str = 'c25b97220734'
@@ -90,10 +91,7 @@ def upgrade() -> None:
                existing_type=sa.TEXT(),
                type_=sqlmodel.sql.sqltypes.AutoString(),
                existing_nullable=True)
-    op.alter_column('workouts', 'day_of_week',
-               existing_type=sa.INTEGER(),
-               type_=sqlmodel.sql.sqltypes.AutoString(),
-               existing_nullable=True)
+    op.add_column('workouts', sa.Column('day_of_week', sa.Integer(), nullable=True))
     op.drop_constraint('workouts_user_id_fkey', 'workouts', type_='foreignkey')
     op.create_foreign_key(None, 'workouts', 'users', ['user_id'], ['id'])
     # ### end Alembic commands ###
