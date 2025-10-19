@@ -2,21 +2,18 @@
   <div>
     <div class="title">
       <font-awesome-icon icon="fa-solid fa-dumbbell" />
-      <h1>Gymbro App</h1>
+      <h1>JYMBRO</h1>
       <font-awesome-icon icon="fa-solid fa-dumbbell" />
     </div>
     <div class="login-container">
       <h2>{{ isLogin ? 'Login' : 'Sign Up' }}</h2>
       <form @submit.prevent="handleSubmit" class="login-form">
-        <!-- Champs pour l'inscription -->
         <div v-if="!isLogin" class="signup-fields">
           <input v-model="form.username" type="text" placeholder="Username" required />
 
-          <!-- 👇 CHAMP AJOUTÉ : Date de naissance 👇 -->
           <label for="birthdate">Birthdate</label>
           <input id="birthdate" v-model="form.birthdate" type="date" required />
 
-          <!-- 👇 CHAMP AJOUTÉ : Genre 👇 -->
           <label for="gender">Gender</label>
           <select id="gender" v-model="form.gender" required>
             <option value="male">Male</option>
@@ -24,7 +21,6 @@
           </select>
         </div>
 
-        <!-- Champs communs -->
         <input v-model="form.email" type="email" placeholder="Email" required />
         <input v-model="form.password" type="password" placeholder="Password" required />
 
@@ -46,7 +42,6 @@ import { useAuthStore } from '../stores/auth'
 const router = useRouter()
 const authStore = useAuthStore()
 
-// On ajoute les nouveaux champs au formulaire
 const form = reactive({
   email: '',
   password: '',
