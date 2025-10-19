@@ -41,6 +41,11 @@
 
 <style scoped>
 .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   display: flex;
   justify-content: space-around;
   background-color: var(--color-background);
