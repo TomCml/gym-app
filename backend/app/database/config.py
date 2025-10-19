@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "GymApp"
     API_PREFIX: str = "/api"
 
-    DATABASE_URL: str
+    SQLALCHEMY_DATABASE_URI: str = Field(alias='DATABASE_URL')
     
     SECRET_KEY: str
 
