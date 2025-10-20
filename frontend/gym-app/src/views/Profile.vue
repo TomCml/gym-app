@@ -629,6 +629,11 @@ h3 {
   font-weight: 600;
 }
 
+#height,
+#weight {
+  width: 38vw;
+}
+
 .form-group input,
 .form-group select {
   padding: 12px;
