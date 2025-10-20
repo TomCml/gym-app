@@ -445,6 +445,9 @@ const changePassword = async () => {
 </script>
 
 <style scoped>
+h1 {
+  margin-top: 10px;
+}
 h2 {
   font-family: Bungee;
   font-weight: 300;
@@ -453,6 +456,7 @@ h2 {
 }
 
 h3 {
+  margin-top: 0px;
   font-family: Bungee;
   font-weight: 300;
   font-size: 20px;
