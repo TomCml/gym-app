@@ -1,7 +1,8 @@
 from typing import List, Optional
 from sqlmodel import select
 from sqlalchemy.orm import Session
-from datetime import datetime
+from sqlalchemy import func
+from datetime import datetime, date
 from app.database.db import get_session
 from app.models.base import UserExerciseLog, User, Exercise, Workout
 from app.schemas.user_exercise_log import UserExerciseLogCreate, UserExerciseLogUpdate, UserExerciseLogOut, AddLogsToWorkout
@@ -81,3 +82,11 @@ def create_log(log_in: UserExerciseLogCreate, user_id: int, session: Session) ->
     session.commit()
     session.refresh(db_log)
     return UserExerciseLogOut.model_validate(db_log)
+
+def get_logs_for_date(user_id: int, target_date: date, session: Session) -> List[UserExerciseLog]:
+    return session.exec(
+        select(UserExerciseLog).where(
+            UserExerciseLog.user_id == user_id,
+            func.date(UserExerciseLog.date) == target_date
+        )
+    ).all()

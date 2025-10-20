@@ -7,6 +7,7 @@ from app.routers.users import router as users_router
 from app.routers.exercises import router as exercises_router
 from app.routers.workouts import router as workouts_router
 from app.routers import logs as logs_router
+from app.routers import dashboard as dashboard_router
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -36,3 +37,4 @@ app.include_router(users_router, prefix="/api/users", tags=["users"])
 app.include_router(exercises_router, prefix="/api/exercises", tags=["exercises"])
 app.include_router(workouts_router, prefix="/api/workouts", tags=["workouts"])
 app.include_router(logs_router.router, prefix="/api/logs", tags=["logs"])
+app.include_router(dashboard_router.router, prefix="/api/dashboard", tags=["dashboard"])

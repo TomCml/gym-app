@@ -76,4 +76,9 @@ export const api = {
   createLog(userId, logData) {
     return apiClient.post('/api/logs/', logData, { params: { user_id: userId } })
   },
+
+  //--- Dashboard ---
+  fetchDashboardData(userId) {
+    return apiClient.get(`/api/dashboard/${userId}`)
+  },
 }
