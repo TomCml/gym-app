@@ -2,15 +2,14 @@
   <div class="page-container">
     <Loader :show="status === 'loading'" />
 
-    <div v-if="status === 'idle' && workout" class="content-view">
+    <div v-if="status === 'idle' && workout && workout.id" class="content-view">
       <h2 class="subtitle">Today's Workout</h2>
       <h1 class="title">{{ workout.name }}</h1>
       <button class="btn-primary" @click="liveWorkoutStore.startWorkout()">Start Workout</button>
     </div>
 
     <div v-if="!workout && status === 'idle'" class="content-view">
-      <p class="empty-state">No workout planned for today.</p>
-      <button class="btn-secondary" @click="router.push('/workouts')">Choose a workout</button>
+      <p class="subtitle">No workout planned for today.</p>
     </div>
 
     <div v-if="status === 'exercising' && currentExercise" class="content-view">
