@@ -39,6 +39,7 @@ main {
   flex-grow: 1;
   overflow-y: auto;
   position: relative;
+  padding-bottom: 80px;
 }
 
 main {
