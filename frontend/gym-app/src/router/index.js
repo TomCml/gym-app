@@ -36,8 +36,8 @@ const routes = [
     meta: { requiresAuth: true, transition: 'slide-up' },
   },
   {
-    path: '/Stats',
-    name: 'Stats',
+    path: '/stats',
+    name: 'stats',
     component: Stats,
     meta: { requiresAuth: true },
   },
@@ -72,7 +72,7 @@ const routes = [
     },
   },
   {
-    path: '/liveworkout:id',
+    path: '/liveworkout',
     name: 'liveworkout',
     component: LiveWorkout,
     meta: { requiresAuth: true },

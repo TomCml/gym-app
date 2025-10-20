@@ -14,7 +14,7 @@
       <div>Workouts</div>
     </router-link>
 
-    <router-link to="/liveworkout:id" class="nav-item circle">
+    <router-link to="/liveworkout" class="nav-item circle">
       <div class="play">
         <font-awesome-icon icon="fa-solid fa-circle-play" />
         <div></div>
