@@ -16,22 +16,19 @@ services:
       retries: 10
 
   backend:
-    build: ./backend
     image: thomascml/gym-app-backend
     ports:
       - "8000:8000"
     depends_on:
       db:
-        condition: service_healthy
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+        condition: service_started
   frontend:
     build: ./frontend
     image: thomascml/gym-app-frontend
     ports:
       - "80:80"
-    volumes:
-      - ./frontend:/app
-
+    depends_on:
+      backend:
+        condition: service_started
 volumes:
   postgres_data:
