@@ -19,8 +19,10 @@ build/
 #Environnement
 
 .env
-#.env.* for demo puposes
-#*.env
+.env.dev
+.env.prod
+.env.* 
+*.env
 
 
 #IDE

@@ -16,8 +16,7 @@ app = FastAPI(title=settings.PROJECT_NAME)
 
 # --------------------------------------------------------------------------
 origins = [
-    "http://localhost:5173",  # L'adresse par défaut de Vite
-    "https://gym-app-dcst.onrender.com",  # Une autre adresse possible pour Vite
+    "http://frontend:5173", 
 ]
 
 app.add_middleware(
