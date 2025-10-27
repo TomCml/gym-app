@@ -1,9 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
-from typing import List
-from pydantic import Field
 
-ENVIRONMENT = os.getenv("ENVIRONMENT", "development")  # default: dev
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "GymApp"
@@ -17,7 +15,7 @@ class Settings(BaseSettings):
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        driver = "psycopg"  # ou "psycopg2" selon ton driver
+        driver = "psycopg2" 
         return f"postgresql+{driver}://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@db:5432/{self.POSTGRES_DB}"
 
     model_config = SettingsConfigDict(
@@ -26,5 +24,4 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-# Instance globale
 settings = Settings()

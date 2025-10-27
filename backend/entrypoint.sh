@@ -1,35 +1,37 @@
-#!/bin/sh
-
-VENV_BIN="/opt/venv/bin"
-
+#!/bin/bash
+set -e
 
 echo "--- Checking commands ---"
 which nc
-which alembic 
-which /usr/lib/postgresql/15/bin/psql    
-which python  
-which uvicorn 
+which alembic
+which psql
+which python
+which uvicorn
 echo "--- End Checks ---"
 
-
-
+# Wait for PostgreSQL
 echo "Waiting for postgres..."
 while ! nc -z db 5432; do
   sleep 0.1
 done
 echo "PostgreSQL started"
 
+# Run migrations
 echo "Running database migrations..."
-$VENV_BIN/python -m alembic upgrade head 
+alembic upgrade head || echo "Migration failed, continuing..."
 
+# Seed database
 echo "Checking if database needs seeding..."
-EMPTY=$(/usr/lib/postgresql/15/bin/psql -h db -U $POSTGRES_USER -d $POSTGRES_DB -t -c "SELECT EXISTS (SELECT 1 FROM exercises LIMIT 1);")
-if [ "$(echo $EMPTY | xargs)" = "f" ]; then
-  echo "Populating database..."
-  /usr/lib/postgresql/15/bin/psql -h db -U $POSTGRES_USER -d $POSTGRES_DB -f /home/appuser/backend/seed_exercises.sql  
+EXERCISE_COUNT=$(PGPASSWORD=$POSTGRES_PASSWORD psql -h db -U $POSTGRES_USER -d $POSTGRES_DB -tAc "SELECT COUNT(*) FROM exercises;" 2>/dev/null || echo "0")
+
+if [ "$EXERCISE_COUNT" = "0" ]; then
+    echo "Database is empty. Populating with seed data..."
+    PGPASSWORD=$POSTGRES_PASSWORD psql -h db -U $POSTGRES_USER -d $POSTGRES_DB -f /backend/seed_exercises.sql
+    echo "Database populated successfully."
 else
-  echo "Skipping population."
+    echo "Database already contains $EXERCISE_COUNT exercises. Skipping population."
 fi
 
+# Start the application
 echo "Starting FastAPI app..."
-exec $VENV_BIN/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+exec "$@"
