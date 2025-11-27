@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.models.base import User
 from app.schemas.user import UserCreate, UserUpdate
 from passlib.context import CryptContext
+from datetime import datetime
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -37,14 +38,45 @@ def update_user(user_id: int, user_update: UserUpdate, session: Session) -> Opti
         return None
 
     update_data = user_update.model_dump(exclude_unset=True)
+
     
+    # --- VÉRIFICATION UNIQUE (EMAIL) ---
+    if "email" in update_data and update_data["email"] != user.email:
+        existing_user = session.exec(
+            select(User).where(User.email == update_data["email"])
+        ).first()
+        if existing_user:
+            raise ValueError(f"L'email {update_data['email']} est déjà pris.")
+    
+    if "username" in update_data and update_data["username"] != user.username:
+        existing_user = session.exec(
+            select(User).where(User.username == update_data["username"])
+        ).first()
+        if existing_user:
+            raise ValueError(f"Le nom d'utilisateur {update_data['username']} est déjà pris.")
+
+    if "birthdate" in update_data and isinstance(update_data["birthdate"], str):
+        try:
+            update_data["birthdate"] = datetime.fromisoformat(
+                update_data["birthdate"].replace('Z', '+00:00')
+            )
+        except ValueError:
+            raise ValueError("Format de date invalide. Attendu format ISO.")
+
     for field, value in update_data.items():
-        if field != "password":
+        if field != "password":  
             setattr(user, field, value)
             
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    user.updated_at = datetime.utcnow() 
+
+    try:
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+    except Exception as e:
+        session.rollback()
+        raise e 
+        
     return user
 
 def update_user_password(user: User, new_password: str, session: Session) -> User:

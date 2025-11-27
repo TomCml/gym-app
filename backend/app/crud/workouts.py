@@ -6,8 +6,9 @@ from app.database.db import get_session
 from app.models.base import Workout, User  # User pour check FK
 from app.schemas.workouts import WorkoutCreate, WorkoutUpdate, WorkoutOut
 from .workout_exercises import WorkoutExerciseCreate
-from app.models.base import Workout, WorkoutExercise 
-from sqlmodel import select, delete  
+from app.models.base import Workout, WorkoutExercise, Exercise
+from sqlmodel import select, delete
+import logging  
 
 def create_workout(workout_in: WorkoutCreate, session: Session) -> WorkoutOut:
     owner = session.get(User, workout_in.user_id)
@@ -104,3 +105,96 @@ def delete_workout(workout_id: int, session: Session) -> bool:
     session.delete(workout)
     session.commit()
     return True
+
+
+def create_default_workouts(db: Session, user_id: int):
+    """
+    Crée les 4 workouts de base pour un nouvel utilisateur.
+    """
+    
+    all_exercises_query = db.exec(select(Exercise)).all()
+    exercise_map = {ex.name: ex.id for ex in all_exercises_query}
+
+    objects_to_add = [] 
+
+    for workout_data in DEFAULT_WORKOUTS_DATA:
+        new_workout = Workout(
+            name=workout_data["name"],
+            user_id=user_id
+        )
+        objects_to_add.append(new_workout)
+
+        for ex_data in workout_data["exercises"]:
+            ex_name = ex_data["name"]
+            
+            exercise_id = exercise_map.get(ex_name)
+            
+            if not exercise_id:
+                logging.warning(f"Exercice de base '{ex_name}' non trouvé dans la BDD. Il ne sera pas ajouté au workout par défaut.")
+                continue
+
+            new_link = WorkoutExercise(
+                workout=new_workout, 
+                exercise_id=exercise_id,
+                planned_sets=ex_data["sets"],
+                planned_reps=ex_data["reps_str"],
+                rest_seconds=ex_data["rest"],
+                notes=ex_data["notes"]
+            )
+            objects_to_add.append(new_link)
+
+    try:
+        db.add_all(objects_to_add)
+        db.commit()
+        logging.info(f"Workouts de base créés avec succès pour l'utilisateur {user_id}")
+    except Exception as e:
+        db.rollback() 
+        logging.error(f"Erreur lors de la création des workouts de base pour {user_id}: {e}")
+
+
+DEFAULT_WORKOUTS_DATA = [
+     
+    {
+        "name": "Push day",
+        "exercises": [
+            {"name": "Barbell Bench Press", "sets": 3, "reps_str": "7", "rest": 180, "notes": "RPE 8. Fundamental movement. Full body tension, drive through the feet."},
+            {"name": "Incline Dumbbell Press", "sets": 3, "reps_str": "12", "rest": 120, "notes": "RPE 8.5. Focus on volume and hypertrophy."},
+            {"name": "Cable Crossover", "sets": 3, "reps_str": "15", "rest": 90, "notes": "RPE 9. Endurance/Metabolic Hypertrophy."},
+            {"name": "Dumbbell Lateral Raise", "sets": 3, "reps_str": "15", "rest": 60, "notes": "RPE 9. Isolate the medial deltoid. Strict movement."},
+            {"name": "Reverse Grip Triceps Pushdown", "sets": 3, "reps_str": "15", "rest": 60, "notes": "RPE 9. Focus on full extension."}, 
+            {"name": "Face Pull", "sets": 2, "reps_str": "20", "rest": 60, "notes": "RPE 7. Rotator cuff and rear delt work."},
+        ]
+    },
+    {
+        "name": "Pull day",
+        "exercises": [
+            {"name": "Pull-up", "sets": 3, "reps_str": "7", "rest": 180, "notes": "RPE 8. Back/Strength Priority. Initiate with scapulae."},
+            {"name": "Romanian Deadlift (RDL)", "sets": 3, "reps_str": "10", "rest": 150, "notes": "RPE 8. Push hips back, maintain neutral spine."},
+            {"name": "Bent-Over Barbell Row", "sets": 3, "reps_str": "12", "rest": 120, "notes": "RPE 8.5. Pull with the elbows. Contract mid-back."},
+            {"name": "Seated Cable Row", "sets": 3, "reps_str": "115", "rest": 90, "notes": "RPE 9. Back Endurance/Hypertrophy."},
+            {"name": "Standing Barbell Curl", "sets": 3, "reps_str": "15", "rest": 60, "notes": "RPE 9. Strict control, no swinging."},
+            {"name": "Hammer Curl", "sets": 2, "reps_str": "15", "rest": 60, "notes": "RPE 8. For arm thickness."},
+        ]
+    },
+    {
+        "name": "Insane leg day",
+        "exercises": [
+            {"name": "Barbell Back Squat", "sets": 3, "reps_str": "7", "rest": 180, "notes": "RPE 8. Strength Priority. Impeccable technique."},
+            {"name": "Leg Press", "sets": 3, "reps_str": "12", "rest": 120, "notes": "RPE 8.5. Hypertrophy. Control the range of motion."},
+            {"name": "Reverse Lunge", "sets": 3, "reps_str": "15", "rest": 90, "notes": "RPE 9. Stability and balance. Aim for a long step."},
+            {"name": "Leg Extension", "sets": 3, "reps_str": "20", "rest": 60, "notes": "RPE 9.5. Endurance. Hold peak contraction 1-2s."},
+            {"name": "Seated Leg Curl", "sets": 3, "reps_str": "15", "rest": 60, "notes": "RPE 9. Hamstring focus. Mind-muscle connection."},
+            {"name": "Standing Calf Raise", "sets": 3, "reps_str": "20", "rest": 60, "notes": "RPE 9.5. Maximal range of motion."},
+        ]
+    },
+    {
+        "name": "Full body",
+        "exercises": [
+            {"name": "Hack Squat", "sets": 2, "reps_str": "20", "rest": 90, "notes": "RPE 7.5. Light load. Controlled but quick tempo."},
+            {"name": "Lat Pulldown", "sets": 2, "reps_str": "20", "rest": 60, "notes": "RPE 7.5. Focus on tempo and feel."},
+            {"name": "Push-up", "sets": 2, "reps_str": "20", "rest": 60, "notes": "RPE 7.5. Focus on explosive pushing."},
+            {"name": "Walking Lunge", "sets": 2, "reps_str": "20", "rest": 60, "notes": "RPE 7. Mobility and endurance."},
+            {"name": "Standing Barbell Curl", "sets": 2, "reps_str": "15", "rest": 45, "notes": "RPE 7. Light "}, 
+        ]
+    },
+]

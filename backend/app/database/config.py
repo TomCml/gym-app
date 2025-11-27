@@ -1,20 +1,27 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List
-from pydantic import Field
+import os
+
+ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
+
 class Settings(BaseSettings):
-    """
-    Pydantic lit automatiquement les variables d'environnement
-    et celles du fichier .env pour remplir ces champs.
-    """
     PROJECT_NAME: str = "GymApp"
     API_PREFIX: str = "/api"
 
-    SQLALCHEMY_DATABASE_URI: str = Field(alias='DATABASE_URL')
-    
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_DB: str
     SECRET_KEY: str
-
     ALLOW_ORIGINS: str
-    
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        driver = "psycopg2" 
+        return f"postgresql+{driver}://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@db:5432/{self.POSTGRES_DB}"
+
+    model_config = SettingsConfigDict(
+        env_file=".env.dev" if ENVIRONMENT == "development" else ".env.prod",
+        env_file_encoding="utf-8",
+        extra="ignore"
+    )
 
 settings = Settings()

@@ -2,7 +2,7 @@
   <div>
     <div class="title">
       <font-awesome-icon icon="fa-solid fa-dumbbell" />
-      <h1>JYMBRO</h1>
+      <h1>JYMBRO app</h1>
       <font-awesome-icon icon="fa-solid fa-dumbbell" />
     </div>
     <div class="login-container">
@@ -47,7 +47,7 @@ const form = reactive({
   password: '',
   username: '',
   birthdate: '',
-  gender: 'male', 
+  gender: 'male',
 })
 const error = ref('')
 const isLogin = ref(true)

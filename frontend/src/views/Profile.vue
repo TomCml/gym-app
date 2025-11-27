@@ -2,7 +2,6 @@
   <div class="profile-container">
     <h1 class="page-title">Mon Profil</h1>
 
-    <!-- Section d'affichage des informations -->
     <div v-if="!isEditing" class="profile-view">
       <div class="profile-card">
         <div class="profile-header">
@@ -331,7 +330,6 @@ const formatGoal = (goal) => {
 }
 
 const startEditing = () => {
-  // Préparer le formulaire avec les données actuelles
   const birthdate = user.value.birthdate
     ? new Date(user.value.birthdate).toISOString().split('T')[0]
     : ''
@@ -364,7 +362,6 @@ const saveProfile = async () => {
   updateSuccess.value = false
 
   try {
-    // Convertir la date au format ISO avec heure
     const birthdateWithTime = new Date(editForm.value.birthdate + 'T00:00:00').toISOString()
 
     const updateData = {
@@ -410,7 +407,6 @@ const changePassword = async () => {
   passwordError.value = ''
   passwordSuccess.value = false
 
-  // Validation
   if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
     passwordError.value = 'Les mots de passe ne correspondent pas'
     return

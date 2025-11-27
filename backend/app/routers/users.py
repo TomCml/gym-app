@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select, func  # Import func for COUNT
 from ..database.db import get_session
 from ..models.base import User
+from ..crud.workouts import create_default_workouts
 from ..crud.user import (
     create_user,
     get_user,
@@ -34,23 +35,18 @@ router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="api/v1/users/login"
 )  # URL complète pour la clarté
-SECRET_KEY = os.getenv("SECRET_KEY", "a_very_secret_key_that_should_be_long_and_random")
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
-# 💡 Conseil : 84 jours, c'est très long. Pense à un temps plus court (ex: 1 jour)
-# et à implémenter un système de "refresh token" pour une meilleure sécurité.
 ACCESS_TOKEN_EXPIRE_MINUTES = 120960  # 84 jours
 
 
-# --- Fonctions Utilitaires pour le Token ---
 def create_access_token(data: dict):
     to_encode = data.copy()
-    # Utilise timezone.utc pour éviter les problèmes de fuseaux horaires
     expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# --- Dépendance pour obtenir l'utilisateur courant ---
 def get_current_user(
     session: Session = Depends(get_session), token: str = Depends(oauth2_scheme)
 ) -> User:
@@ -96,6 +92,13 @@ def create_new_user(user_in: UserCreate, session: Session = Depends(get_session)
         raise HTTPException(status_code=409, detail="Username already registered")
 
     user = create_user(user_in, session)
+    try:
+        
+        create_default_workouts(db=session, user_id=user.id)
+
+    except Exception as e:
+        print(f"ATTENTION: L'utilisateur {user.email} a été créé, mais la création des workouts de base a échoué: {e}")
+    
     return user
 
 
@@ -146,7 +149,6 @@ def read_users(
     Récupère une liste paginée d'utilisateurs.
     """
     users = get_users(session, offset, limit)
-    # ✨ CORRECTION : Compte le nombre total d'utilisateurs dans la base de données
     total_users = session.exec(select(func.count(User.id))).one()
     return {"users": users, "total": total_users}
 
@@ -246,10 +248,7 @@ def read_user_logs(
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    Récupère les logs d'exercices pour un utilisateur spécifique.
-    🔒 Seul un utilisateur peut voir ses propres logs (ou un admin).
-    """
+    
     if current_user.id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
