@@ -1,20 +1,8 @@
-services:
-  # --- LE REVERSE PROXY (Gère le SSL et l'entrée) ---
-  nginx-proxy:
-    image: "jc21/nginx-proxy-manager:latest"
-    restart: unless-stopped
-    ports:
-      - "80:80" # Entrée HTTP publique
-      - "443:443" # Entrée HTTPS publique
-      - "81:81" # Interface d'administration
-    volumes:
-      - ./npm-data:/data
-      - ./npm-letsencrypt:/etc/letsencrypt
-    depends_on:
-      - frontend
-      - backend
+version: "3.8"
 
-  # --- BASE DE DONNEES ---
+services:
+  # --- SUPPRIME TOUT LE BLOC 'nginx-proxy' ---
+
   db:
     image: postgres:16-alpine
     env_file:
@@ -27,7 +15,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # --- BACKEND (API) ---
   backend:
     build:
       context: ./backend
@@ -38,15 +25,23 @@ services:
     depends_on:
       db:
         condition: service_started
+    networks: # AJOUT IMPORTANT
+      - reseau-web # Pour que le proxy le trouve
+      - default
 
-  # --- FRONTEND (Site Web) ---
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: "https://api.ton-domaine-gym.com"
     image: thomascml/gym-app-frontend
     container_name: gym_frontend
     depends_on:
       backend:
         condition: service_started
+    networks: # AJOUT IMPORTANT
+      - reseau-web # Pour que le proxy le trouve
+      - default
 
 volumes:
   postgres_data:
