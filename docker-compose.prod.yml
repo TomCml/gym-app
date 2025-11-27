@@ -1,8 +1,5 @@
-version: "3.8"
-
 services:
-  # --- SUPPRIME TOUT LE BLOC 'nginx-proxy' ---
-
+  # --- BASE DE DONNÉES ---
   db:
     image: postgres:16-alpine
     env_file:
@@ -14,7 +11,10 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - default
 
+  # --- BACKEND (API) ---
   backend:
     build:
       context: ./backend
@@ -25,22 +25,23 @@ services:
     depends_on:
       db:
         condition: service_started
-    networks: # AJOUT IMPORTANT
-      - reseau-web # Pour que le proxy le trouve
-      - default
+    networks:
+      - reseau-web # Pour être accessible par le Proxy (api.jymbro.fr)
+      - default # Pour parler à la DB
 
+  # --- FRONTEND (Site Web) ---
   frontend:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: "https://api.ton-domaine-gym.com"
+        VITE_API_URL: ${VITE_API_URL}
     image: thomascml/gym-app-frontend
     container_name: gym_frontend
     depends_on:
       backend:
         condition: service_started
-    networks: # AJOUT IMPORTANT
-      - reseau-web # Pour que le proxy le trouve
+    networks:
+      - reseau-web # Pour être accessible par le Proxy (jymbro.fr)
       - default
 
 volumes:
