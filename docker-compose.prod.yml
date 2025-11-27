@@ -3,7 +3,7 @@ services:
   db:
     image: postgres:16-alpine
     env_file:
-      - ./.env.prod
+      - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -19,7 +19,7 @@ services:
     build:
       context: ./backend
     env_file:
-      - ./.env.prod
+      - ./.env
     volumes:
       - ./backend:/home/appuser/backend
     depends_on:
