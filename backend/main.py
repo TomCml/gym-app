@@ -13,10 +13,13 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
+frontend_url = os.getenv("ALLOW_ORIGIN", "http://localhost:5173")
+print(f"--- INFO: Autorisation CORS pour l'origine: {frontend_url} ---") # Pour déboguer
 
 # --------------------------------------------------------------------------
+# CORRECTION ICI : Utilisez de vrais espaces pour l'indentation
 origins = [
-    "http://frontend:5173", 
+    frontend_url, 
 ]
 
 app.add_middleware(
@@ -30,6 +33,7 @@ app.add_middleware(
 
 @app.get("/api")
 def root():
+    # CORRECTION ICI : Utilisez de vrais espaces
     return {"message": "Server running"}
 
 app.include_router(users_router, prefix="/api/users", tags=["users"])
