@@ -13,22 +13,17 @@
     </div>
 
     <div v-if="status === 'exercising' && currentExercise" class="content-view">
-      <div class="header-controls">
-        <button class="btn-skip" @click="skipToNext" title="Skip to next state">⏭️ Skip</button>
-        <button class="btn-stop" @click="showStopModal = true" title="Stop workout">⏹️ Stop</button>
-      </div>
-
       <p class="subtitle">Set {{ currentSetIndex + 1 }} / {{ currentExercise.planned_sets }}</p>
       <h1 class="title">{{ currentExercise.exercise.name }}</h1>
       <button class="btn-primary btn-set-done" @click="handleSetDone">Set Done</button>
+
+      <div class="header-controls">
+        <button class="btn-stop" @click="showStopModal = true" title="Stop workout">⏹️ Stop</button>
+        <button class="btn-skip" @click="skipToNext" title="Skip to next state">⏭️ Skip</button>
+      </div>
     </div>
 
     <div v-if="status === 'resting'" class="content-view">
-      <div class="header-controls">
-        <button class="btn-skip" @click="skipToNext" title="Skip rest">⏭️ Skip</button>
-        <button class="btn-stop" @click="showStopModal = true" title="Stop workout">⏹️ Stop</button>
-      </div>
-
       <div class="timer-display">{{ restTimer }}</div>
       <h1 class="title-small">Rest</h1>
 
@@ -56,6 +51,11 @@
       <p v-if="nextExercise" class="subtitle">
         Next: {{ nextExercise.exercise.name }} - Set {{ nextSetIndex + 1 }}
       </p>
+
+      <div class="header-controls">
+        <button class="btn-skip" @click="skipToNext" title="Skip rest">⏭️ Skip</button>
+        <button class="btn-stop" @click="showStopModal = true" title="Stop workout">⏹️ Stop</button>
+      </div>
     </div>
 
     <div v-if="status === 'finished'" class="content-view">
@@ -196,6 +196,8 @@ const finishAndGoHome = () => {
   align-items: center;
   gap: 20px;
   position: relative;
+  justify-content: space-between;
+  min-height: 100%;
 }
 
 .header-controls {
@@ -203,15 +205,16 @@ const finishAndGoHome = () => {
   gap: 10px;
   justify-content: center;
   width: 100%;
-  margin-bottom: 10px;
+  margin-top: auto;
+  padding-top: 20px;
 }
 
 .btn-skip,
 .btn-stop {
-  padding: 10px 16px;
+  padding: 12px 20px;
   border: none;
   border-radius: 20px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s;
