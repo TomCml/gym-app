@@ -24,6 +24,27 @@ export const useWorkoutStore = defineStore('workout', () => {
     try {
       const response = await api.fetchWorkouts(authStore.user.id)
       workouts.value = response.data.workouts
+
+      // Fetch user logs and merge into workouts as workout_exercises[].sets
+      try {
+        const logsResp = await api.fetchUserLogs(authStore.user.id)
+        const logs = logsResp.data
+        // logs: array of UserExerciseLogOut objects
+        workouts.value.forEach((w) => {
+          if (!w.workout_exercises) return
+          w.workout_exercises.forEach((we) => {
+            // exercise may be an object with id
+            const exerciseId = we.exercise?.id || we.exercise_id
+            const setsForExercise = logs.filter(
+              (log) => log.workout_id === w.id && log.exercise_id === exerciseId,
+            )
+            // attach sets array expected by the frontend
+            we.sets = setsForExercise
+          })
+        })
+      } catch (err) {
+        console.error('Failed to fetch user logs to build sets:', err)
+      }
     } catch (error) {
       console.error('Error fetching workouts:', error)
     } finally {

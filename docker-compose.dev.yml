@@ -1,18 +1,22 @@
 services:
+  # --- DATABASE ---
   db:
     image: postgres:16-alpine
     env_file:
       - ./.env.dev
     ports:
-      - "5432:5432"
+      - "5432:5432" # Expose for local tools like pgAdmin if needed
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # No initdb seed volume; handled by backend entrypoint for dev flexibility
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    # No external networks for local dev
 
+  # --- BACKEND (API) ---
   backend:
     build:
       context: ./backend
@@ -20,23 +24,36 @@ services:
       - "8000:8000"
     env_file:
       - ./.env.dev
+    environment: # Ajoute ça : Force les vars critiques
+      - ALLOW_ORIGINS=http://localhost,http://localhost:5173,http://localhost:80
+      - VITE_API_URL=http://localhost:8000 # Au cas où
     volumes:
-      - ./backend:/home/appuser/backend
+      - ./backend:/backend # Bind mount for hot-reload (overlays built code; matches WORKDIR)
     depends_on:
       db:
-        condition: service_started
+        condition: service_healthy # Wait for DB to be fully ready
+    # No external networks for local dev
+
+  # --- FRONTEND (Dev Server) ---
   frontend:
     image: node:22-alpine
     working_dir: /frontend
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend:/frontend
-      - /frontend/node_modules
     env_file:
-      - ./.env.dev
-    command: sh -c "npm install && npm run dev -- --host"
+      - ./.env.dev # Provides VITE_API_URL for Vite dev server
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Required for file watching over bind mounts in Docker
+    ports:
+      - "5173:5173" # Vite dev server port
+    volumes:
+      - ./frontend:/frontend # Bind mount for hot-reload
+      - /frontend/node_modules # Avoid overriding container's node_modules with host's
+    command: sh -c "npm ci && npm run dev -- --host" # Use npm ci for clean install; --host binds to 0.0.0.0
+    depends_on:
+      backend:
+        condition: service_started
+    # No external networks for local dev
+
 volumes:
   postgres_data:
+    driver: local
+# No custom networks for local dev (uses default)

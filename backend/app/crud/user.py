@@ -18,6 +18,9 @@ def create_user(user_in: UserCreate, session: Session) -> User:
     hashed_password = get_password_hash(user_in.password)
 
     user_data = user_in.model_dump(exclude={"password"})
+    # normalize field name coming from schema -> model
+    if "body_fat_percentage" in user_data:
+        user_data["body_fat"] = user_data.pop("body_fat_percentage")
     db_user = User(**user_data, hashed_password=hashed_password)
     
     session.add(db_user)
@@ -38,6 +41,9 @@ def update_user(user_id: int, user_update: UserUpdate, session: Session) -> Opti
         return None
 
     update_data = user_update.model_dump(exclude_unset=True)
+    # normalize field name if frontend sends body_fat_percentage
+    if "body_fat_percentage" in update_data:
+        update_data["body_fat"] = update_data.pop("body_fat_percentage")
 
     
     # --- VÉRIFICATION UNIQUE (EMAIL) ---

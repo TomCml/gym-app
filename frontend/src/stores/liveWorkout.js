@@ -1,128 +1,181 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { api } from '@/services/api'
 import { useAuthStore } from './auth'
 
-export const useLiveWorkoutStore = defineStore(
-  'liveWorkout',
-  () => {
-    const workout = ref(null)
-    const status = ref('idle')
-    const currentExerciseIndex = ref(0)
-    const currentSetIndex = ref(0)
-    const restTimer = ref(0)
-    let timerInterval = null
-
-    const currentExercise = computed(
-      () => workout.value?.workout_exercises[currentExerciseIndex.value],
-    )
-
-    async function fetchTodaysWorkout() {
-      status.value = 'loading'
+export const useLiveWorkoutStore = defineStore('liveWorkout', {
+  state: () => ({
+    workout: null,
+    status: 'idle',
+    currentExerciseIndex: 0,
+    currentSetIndex: 0,
+    restTimer: 0,
+    timerInterval: null,
+    logs: [], // <-- added backlog
+  }),
+  persist: true,
+  actions: {
+    async fetchTodaysWorkout() {
+      this.status = 'loading'
       const authStore = useAuthStore()
       try {
         const response = await api.fetchTodaysWorkout(authStore.user.id)
-        workout.value = response.data
-        status.value = 'idle'
+        this.workout = response.data
+        this.status = 'idle'
       } catch (e) {
         console.error("Failed to fetch today's workout:", e)
         if (e.response && e.response.status === 404) {
-          status.value = 'idle'
+          this.status = 'idle'
         } else {
-          status.value = 'error'
+          this.status = 'error'
         }
-        workout.value = null
+        this.workout = null
       }
-    }
+    },
 
-    function startWorkout() {
-      currentExerciseIndex.value = 0
-      currentSetIndex.value = 0
-      status.value = 'exercising'
-    }
+    startWorkout() {
+      this.currentExerciseIndex = 0
+      this.currentSetIndex = 0
+      this.status = 'exercising'
+    },
 
-    function startRest() {
-      status.value = 'resting'
-      restTimer.value = currentExercise.value.rest_seconds || 60
+    startRest() {
+      this.status = 'resting'
+      this.restTimer = this.currentExercise.rest_seconds || 60
 
-      if (timerInterval) clearInterval(timerInterval)
+      if (this.timerInterval) clearInterval(this.timerInterval)
 
-      timerInterval = setInterval(() => {
-        restTimer.value--
-        if (restTimer.value <= 0) {
-          clearInterval(timerInterval)
+      this.timerInterval = setInterval(() => {
+        this.restTimer--
+        if (this.restTimer <= 0) {
+          clearInterval(this.timerInterval)
         }
       }, 1000)
-    }
+    },
 
-    async function saveLogAndContinue(setData) {
+    async saveLogAndContinue(setData) {
+      // keep local backlog
+      this.logs.push(setData)
+
       const authStore = useAuthStore()
       try {
+        // try to send immediately (pass userId then body)
         await api.createLog(authStore.user.id, setData)
+        // on success we could remove the log from backlog (last pushed)
+        // remove first matching entry (safe if duplicates)
+        const idx = this.logs.findIndex(
+          (l) =>
+            l.exercise_id === setData.exercise_id &&
+            l.workout_id === setData.workout_id &&
+            l.set_number === setData.set_number,
+        )
+        if (idx !== -1) this.logs.splice(idx, 1)
       } catch (e) {
-        console.error('Failed to save log', e)
+        // keep in logs backlog for retry later
+        console.error('Failed to send single log, kept in backlog', e)
       }
 
-      const setsInCurrentExercise = currentExercise.value.planned_sets
-      if (currentSetIndex.value < setsInCurrentExercise - 1) {
-        currentSetIndex.value++
+      const setsInCurrentExercise = this.currentExercise.planned_sets
+      if (this.currentSetIndex < setsInCurrentExercise - 1) {
+        this.currentSetIndex++
       } else {
-        currentExerciseIndex.value++
-        currentSetIndex.value = 0
+        this.currentExerciseIndex++
+        this.currentSetIndex = 0
       }
 
-      if (currentExerciseIndex.value >= workout.value.workout_exercises.length) {
-        status.value = 'finished'
+      if (this.currentExerciseIndex >= this.workout.workout_exercises.length) {
+        this.status = 'finished'
       } else {
-        status.value = 'exercising'
+        this.status = 'exercising'
       }
-    }
+    },
 
-    async function validateTodaysWorkout() {
-      if (status.value === 'exercising' || status.value === 'resting') {
+    stopWorkout() {
+      if (this.timerInterval) clearInterval(this.timerInterval)
+      this.workout = null
+      this.status = 'idle'
+      this.currentExerciseIndex = 0
+      this.currentSetIndex = 0
+      this.restTimer = 0
+      this.logs = [] // clear backlog on stop
+    },
+
+    // Optional helper to flush backlog (callable from UI or finish)
+    async flushLogs() {
+      if (!this.logs.length) return
+      const toSend = [...this.logs]
+      try {
+        await api.addLogsToWorkout(toSend)
+        this.logs = []
+      } catch (e) {
+        console.error('Failed to flush logs batch', e)
+      }
+    },
+
+    skipToNext() {
+      if (this.status === 'resting') {
+        // Clear the rest timer
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval)
+          this.timerInterval = null
+        }
+        this.restTimer = 0
+        this.status = 'exercising'
+      } else if (this.status === 'exercising') {
+        // Créer un log vide pour cette série
+        const setData = {
+          exercise_id: this.currentExercise.exercise.id,
+          workout_id: this.workout.id,
+          set_number: this.currentSetIndex + 1,
+          reps: 0,
+          weight: 0,
+        }
+        // Appeler saveLogAndContinue qui va incrémenter automatiquement
+        this.saveLogAndContinue(setData)
+      }
+    },
+
+    nextExerciseNow() {
+      if (this.currentExerciseIndex < this.workout.workout_exercises.length - 1) {
+        this.currentExerciseIndex++
+        this.currentSetIndex = 0
+        this.status = 'exercising'
+      } else {
+        this.status = 'finished'
+      }
+    },
+
+    async validateTodaysWorkout() {
+      const authStore = useAuthStore()
+      if (!authStore.user?.id) {
+        this.status = 'idle'
+        this.workout = null
         return
       }
 
-      const authStore = useAuthStore()
       let freshWorkout = null
       try {
         const response = await api.fetchTodaysWorkout(authStore.user.id)
         freshWorkout = response.data
       } catch (e) {
-        console.error('No fresh workout for today or API error.', e)
+        console.error('Error fetching today workout:', e)
+        this.status = 'idle'
+        this.workout = null
+        return
       }
 
-      const persistedWorkoutId = workout.value?.id
-      const freshWorkoutId = freshWorkout?.id
-
-      if (persistedWorkoutId !== freshWorkoutId) {
-        console.log('Workout state is stale. Resetting.')
-        stopWorkout()
-        workout.value = freshWorkout
+      if (freshWorkout && freshWorkout.id) {
+        this.workout = freshWorkout
+        this.status = 'idle'
+      } else {
+        this.status = 'idle'
+        this.workout = null
       }
-    }
-
-    function stopWorkout() {
-      clearInterval(timerInterval)
-      workout.value = null
-      status.value = 'idle'
-    }
-
-    return {
-      workout,
-      status,
-      currentExercise,
-      currentSetIndex,
-      restTimer,
-      fetchTodaysWorkout,
-      startWorkout,
-      startRest,
-      saveLogAndContinue,
-      stopWorkout,
-      validateTodaysWorkout,
-    }
+    },
   },
-  {
-    persist: true,
+  getters: {
+    currentExercise: (state) => {
+      if (!state.workout || !state.workout.workout_exercises) return null
+      return state.workout.workout_exercises[state.currentExerciseIndex]
+    },
   },
-)
+})

@@ -178,7 +178,12 @@ def update_current_user(
     Met à jour les informations de l'utilisateur actuellement connecté.
     """
     assert current_user.id is not None
-    updated_user = update_user(current_user.id, user_update, session)
+    try:
+        updated_user = update_user(current_user.id, user_update, session)
+    except ValueError as e:
+        # Convert validation/value errors to a 400 for the client
+        raise HTTPException(status_code=400, detail=str(e))
+
     if not updated_user:
         raise HTTPException(status_code=404, detail="User not found")
     return updated_user
