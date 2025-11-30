@@ -74,11 +74,35 @@ export const api = {
 
   // --- Logs ---
   createLog(userId, logData) {
-    return apiClient.post('/api/logs/', logData, { params: { user_id: userId } })
+    // Support both signatures for backward compatibility:
+    // - createLog(userId, logData)
+    // - createLog(logData)  (will use current authenticated user id)
+    let resolvedUserId = userId
+    let body = logData
+    if (body === undefined && userId && typeof userId === 'object') {
+      // Called with single argument (the log data)
+      const authStore = useAuthStore()
+      resolvedUserId = authStore.user?.id
+      body = userId
+    }
+    return apiClient.post('/api/logs/', body, { params: { user_id: resolvedUserId } })
+  },
+
+  // fetch logs for a user (used to build sets for workouts on the client)
+  fetchUserLogs(userId, params = {}) {
+    return apiClient.get(`/api/users/${userId}/logs`, { params })
   },
 
   //--- Dashboard ---
   fetchDashboardData(userId) {
     return apiClient.get(`/api/dashboard/${userId}`)
+  },
+
+  // Live Workout
+  getTodaysWorkout() {
+    return apiClient.get('/api/workouts/today')
+  },
+  addLogsToWorkout(logs) {
+    return apiClient.post('/api/logs/batch', { logs })
   },
 }

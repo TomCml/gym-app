@@ -1,5 +1,6 @@
 import sys
 import os
+import logging  # Ajoute pour debug logs
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware 
 from app.database.config import settings
@@ -9,27 +10,46 @@ from app.routers.workouts import router as workouts_router
 from app.routers import logs as logs_router
 from app.routers import dashboard as dashboard_router
 
+# Setup logging basique (sort dans Uvicorn logs)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = FastAPI(title=settings.PROJECT_NAME)
 
-raw_origins = os.getenv("ALLOW_ORIGINS", "http://localhost:5173")
-
-origins = [origin.strip() for origin in raw_origins.split(",")]
+# Parsing safe : Default vide, try-except pour éviter crash
+raw_origins = os.getenv("ALLOW_ORIGINS", "")
+if not raw_origins:
+    logger.warning("ALLOW_ORIGINS not set! Using fallback ['*'] for dev.")
+    origins = ["*"]  # Fallback dev only (permissive, retire en prod)
+else:
+    origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
+    logger.info(f"CORS origins loaded: {origins}")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       # Autorise les origines listées
-    allow_credentials=True,      # Autorise les cookies et en-têtes d'authentification
-    allow_methods=["*"],         # Autorise toutes les méthodes (POST, GET, etc.)
-    allow_headers=["*"],         # Autorise tous les en-têtes
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    expose_headers=["*"],  # Bonus : Expose headers custom si besoin
 )
+
 # --------------------------------------------------------------------------
 
 @app.get("/api")
 def root():
-    # CORRECTION ICI : Utilisez de vrais espaces
     return {"message": "Server running"}
+
+# Endpoint debug temporaire (supprime après)
+@app.get("/debug-cors")
+def debug_cors():
+    return {
+        "raw_allow_origins": os.getenv("ALLOW_ORIGINS", "NOT SET"),
+        "parsed_origins": origins,
+        "frontend_origin": "http://localhost:5173"  # À matcher
+    }
 
 app.include_router(users_router, prefix="/api/users", tags=["users"])
 app.include_router(exercises_router, prefix="/api/exercises", tags=["exercises"])

@@ -16,6 +16,11 @@
       <p class="subtitle">Set {{ currentSetIndex + 1 }} / {{ currentExercise.planned_sets }}</p>
       <h1 class="title">{{ currentExercise.exercise.name }}</h1>
       <button class="btn-primary btn-set-done" @click="handleSetDone">Set Done</button>
+
+      <div class="header-controls">
+        <button class="btn-stop" @click="showStopModal = true" title="Stop workout">⏹️ Stop</button>
+        <button class="btn-skip" @click="skipToNext" title="Skip to next state">⏭️ Skip</button>
+      </div>
     </div>
 
     <div v-if="status === 'resting'" class="content-view">
@@ -46,6 +51,11 @@
       <p v-if="nextExercise" class="subtitle">
         Next: {{ nextExercise.exercise.name }} - Set {{ nextSetIndex + 1 }}
       </p>
+
+      <div class="header-controls">
+        <button class="btn-skip" @click="skipToNext" title="Skip rest">⏭️ Skip</button>
+        <button class="btn-stop" @click="showStopModal = true" title="Stop workout">⏹️ Stop</button>
+      </div>
     </div>
 
     <div v-if="status === 'finished'" class="content-view">
@@ -53,6 +63,15 @@
       <font-awesome-icon icon="fa-solid fa-trophy" class="trophy-icon" />
       <button class="btn-primary" @click="finishAndGoHome">Finish</button>
     </div>
+
+    <!-- Stop Workout Confirmation Modal -->
+    <ConfirmationModal
+      :show="showStopModal"
+      title="Stop Workout"
+      message="Are you sure you want to stop this workout? Your progress will be lost."
+      @close="showStopModal = false"
+      @confirm="handleStopWorkout"
+    />
   </div>
 </template>
 
@@ -61,6 +80,7 @@ import { onMounted, ref, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useLiveWorkoutStore } from '@/stores/liveWorkout'
+import ConfirmationModal from '@/components/ConfirmationModale.vue'
 
 const router = useRouter()
 const liveWorkoutStore = useLiveWorkoutStore()
@@ -68,6 +88,7 @@ const { status, workout, currentExercise, currentSetIndex, restTimer } =
   storeToRefs(liveWorkoutStore)
 
 const currentLog = ref({ weight: 0, reps: 0 })
+const showStopModal = ref(false)
 
 const nextExercise = computed(() => {
   if (!workout.value || !currentExercise.value) return null
@@ -82,6 +103,11 @@ const nextSetIndex = computed(() => {
   if (!currentExercise.value) return 0
   const setsInCurrent = currentExercise.value.planned_sets
   return (currentSetIndex.value + 1) % setsInCurrent
+})
+
+const isLastSetOfExercise = computed(() => {
+  if (!currentExercise.value) return false
+  return currentSetIndex.value === currentExercise.value.planned_sets - 1
 })
 
 onMounted(() => {
@@ -109,6 +135,20 @@ const handleSetDone = () => {
   liveWorkoutStore.startRest()
 }
 
+const skipToNext = () => {
+  if (status.value === 'resting') {
+    // When skipping rest, save the log and continue (same as when timer finishes)
+    handleRestFinished()
+  } else {
+    // When skipping exercise, use store's skipToNext
+    liveWorkoutStore.skipToNext()
+  }
+}
+
+const nextExerciseNow = () => {
+  liveWorkoutStore.nextExerciseNow()
+}
+
 const handleRestFinished = () => {
   const logData = {
     exercise_id: currentExercise.value.exercise.id,
@@ -120,6 +160,12 @@ const handleRestFinished = () => {
   liveWorkoutStore.saveLogAndContinue(logData)
 }
 
+const handleStopWorkout = () => {
+  liveWorkoutStore.stopWorkout()
+  showStopModal.value = false
+  router.push('/workouts')
+}
+
 const adjustWeight = (amount) => {
   currentLog.value.weight = Math.max(0, currentLog.value.weight + amount)
 }
@@ -127,6 +173,7 @@ const adjustWeight = (amount) => {
 const adjustReps = (amount) => {
   currentLog.value.reps = Math.max(0, currentLog.value.reps + amount)
 }
+
 const finishAndGoHome = () => {
   liveWorkoutStore.stopWorkout()
   router.push('/home')
@@ -148,6 +195,70 @@ const finishAndGoHome = () => {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  position: relative;
+  justify-content: space-between;
+  min-height: 100%;
+}
+
+.header-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+.btn-skip,
+.btn-stop {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: Quicksand, sans-serif;
+}
+
+.btn-skip {
+  background: #555;
+  color: #fff;
+}
+
+.btn-skip:hover {
+  background: #666;
+  transform: translateY(-2px);
+}
+
+.btn-stop {
+  background: #d9534f;
+  color: #fff;
+}
+
+.btn-stop:hover {
+  background: #c9302c;
+  transform: translateY(-2px);
+}
+
+.btn-next-exercise {
+  background: linear-gradient(135deg, var(--color-accent), #357abd);
+  color: #fff;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 30px;
+  font-size: 18px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 80%;
+  max-width: 300px;
+  margin-top: 20px;
+  transition: all 0.3s;
+}
+
+.btn-next-exercise:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
 }
 
 .title {
@@ -236,6 +347,7 @@ const finishAndGoHome = () => {
   font-size: 24px;
   font-weight: bold;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 .adjustable-input input::-webkit-outer-spin-button,
 .adjustable-input input::-webkit-inner-spin-button {

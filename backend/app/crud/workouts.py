@@ -19,6 +19,7 @@ def create_workout(workout_in: WorkoutCreate, session: Session) -> WorkoutOut:
         name=workout_in.name,
         date=workout_in.date,
         notes=workout_in.notes,
+        day_of_week=workout_in.day_of_week,
         user_id=workout_in.user_id
     )
     session.add(db_workout)

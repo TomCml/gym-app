@@ -4,7 +4,7 @@ import os
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "GymApp"
+    PROJECT_NAME: str = "Jymbro API"
     API_PREFIX: str = "/api"
 
     POSTGRES_USER: str
