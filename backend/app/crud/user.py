@@ -2,7 +2,7 @@ from typing import List, Optional
 from sqlmodel import select
 from sqlalchemy.orm import Session
 from app.models.base import User
-from app.schemas.user import UserCreate, UserUpdate
+from app.schemas.user import UserCreate, UserUpdate, UserOut
 from passlib.context import CryptContext
 from datetime import datetime
 

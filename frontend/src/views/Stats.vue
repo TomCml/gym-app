@@ -17,7 +17,11 @@
             </option>
           </select>
           <div v-if="selectedExercise" class="chart-container">
-            <Line :data="exerciseProgressChartData" :options="chartOptions" />
+            <Line
+              :key="selectedExercise"
+              :data="exerciseProgressChartData"
+              :options="chartOptions"
+            />
           </div>
           <div v-else class="empty-chart">
             <p>Select an exercise to see your progress.</p>
@@ -87,46 +91,6 @@ const uniqueExercises = computed(() => {
     })
   })
   return Array.from(exercises).sort()
-})
-
-const exerciseProgressChartData = computed(() => {
-  if (!selectedExercise.value) {
-    return { labels: [], datasets: [] }
-  }
-
-  const filteredWorkouts = workouts.value
-    .filter((w) => w.workout_exercises.some((we) => we.exercise.name === selectedExercise.value))
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-
-  const labels = filteredWorkouts.map((w) => new Date(w.date).toLocaleDateString('fr-FR'))
-
-  const data = filteredWorkouts.map((w) => {
-    const workoutExercise = w.workout_exercises.find(
-      (we) => we.exercise.name === selectedExercise.value,
-    )
-    let maxWeight = 0
-    if (workoutExercise && workoutExercise.sets) {
-      workoutExercise.sets.forEach((set) => {
-        if (set.weight > maxWeight) {
-          maxWeight = set.weight
-        }
-      })
-    }
-    return maxWeight
-  })
-
-  return {
-    labels,
-    datasets: [
-      {
-        label: `Max Weight for ${selectedExercise.value} (kg)`,
-        data,
-        borderColor: '#4a90e2',
-        backgroundColor: 'rgba(74, 144, 226, 0.5)',
-        tension: 0.1,
-      },
-    ],
-  }
 })
 
 const volumeChartData = computed(() => {

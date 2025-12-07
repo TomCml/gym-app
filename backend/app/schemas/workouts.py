@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
-from app.models.base import Workout, User, WorkoutExercise, Exercise  # Relations
+from app.models.base import Workout, WorkoutExercise, Exercise
+from app.schemas.user import UserOut
 from app.schemas.workout_exercises import WorkoutExerciseOut, WorkoutExerciseCreate
 
 class WorkoutCreate(BaseModel):
@@ -27,7 +28,7 @@ class WorkoutOut(BaseModel):
     notes: Optional[str]
     day_of_week: Optional[int] = None
     user_id: int
-    user: User  
+    user: UserOut
     workout_exercises: List[WorkoutExerciseOut]  
 
     class Config:
