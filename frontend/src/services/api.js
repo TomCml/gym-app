@@ -88,7 +88,6 @@ export const api = {
     return apiClient.post('/api/logs/', body, { params: { user_id: resolvedUserId } })
   },
 
-  // fetch logs for a user (used to build sets for workouts on the client)
   fetchUserLogs(userId, params = {}) {
     return apiClient.get(`/api/users/${userId}/logs`, { params })
   },

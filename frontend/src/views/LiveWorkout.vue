@@ -112,6 +112,10 @@ const isLastSetOfExercise = computed(() => {
 
 onMounted(() => {
   liveWorkoutStore.validateTodaysWorkout()
+
+  if (status.value === 'resting' && restTimer.value > 0) {
+    liveWorkoutStore.resumeRest()
+  }
 })
 
 watch(

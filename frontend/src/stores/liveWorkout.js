@@ -10,7 +10,7 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
     currentSetIndex: 0,
     restTimer: 0,
     timerInterval: null,
-    logs: [], // <-- added backlog
+    logs: [],
   }),
   persist: true,
   actions: {
@@ -52,16 +52,23 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
       }, 1000)
     },
 
+    resumeRest() {
+      if (this.timerInterval) clearInterval(this.timerInterval)
+
+      this.timerInterval = setInterval(() => {
+        this.restTimer--
+        if (this.restTimer <= 0) {
+          clearInterval(this.timerInterval)
+        }
+      }, 1000)
+    },
+
     async saveLogAndContinue(setData) {
-      // keep local backlog
       this.logs.push(setData)
 
       const authStore = useAuthStore()
       try {
-        // try to send immediately (pass userId then body)
         await api.createLog(authStore.user.id, setData)
-        // on success we could remove the log from backlog (last pushed)
-        // remove first matching entry (safe if duplicates)
         const idx = this.logs.findIndex(
           (l) =>
             l.exercise_id === setData.exercise_id &&
@@ -70,7 +77,6 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
         )
         if (idx !== -1) this.logs.splice(idx, 1)
       } catch (e) {
-        // keep in logs backlog for retry later
         console.error('Failed to send single log, kept in backlog', e)
       }
 
@@ -96,10 +102,9 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
       this.currentExerciseIndex = 0
       this.currentSetIndex = 0
       this.restTimer = 0
-      this.logs = [] // clear backlog on stop
+      this.logs = []
     },
 
-    // Optional helper to flush backlog (callable from UI or finish)
     async flushLogs() {
       if (!this.logs.length) return
       const toSend = [...this.logs]
@@ -113,7 +118,6 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
 
     skipToNext() {
       if (this.status === 'resting') {
-        // Clear the rest timer
         if (this.timerInterval) {
           clearInterval(this.timerInterval)
           this.timerInterval = null
@@ -121,7 +125,6 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
         this.restTimer = 0
         this.status = 'exercising'
       } else if (this.status === 'exercising') {
-        // Créer un log vide pour cette série
         const setData = {
           exercise_id: this.currentExercise.exercise.id,
           workout_id: this.workout.id,
@@ -129,7 +132,6 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
           reps: 0,
           weight: 0,
         }
-        // Appeler saveLogAndContinue qui va incrémenter automatiquement
         this.saveLogAndContinue(setData)
       }
     },
@@ -152,20 +154,29 @@ export const useLiveWorkoutStore = defineStore('liveWorkout', {
         return
       }
 
+      if (this.workout && (this.status === 'exercising' || this.status === 'resting')) {
+        console.log('Workout en cours détecté, on ne réinitialise pas le state.')
+        return
+      }
+
       let freshWorkout = null
       try {
         const response = await api.fetchTodaysWorkout(authStore.user.id)
         freshWorkout = response.data
       } catch (e) {
         console.error('Error fetching today workout:', e)
-        this.status = 'idle'
-        this.workout = null
+        if (this.status !== 'exercising' && this.status !== 'resting') {
+          this.status = 'idle'
+          this.workout = null
+        }
         return
       }
 
       if (freshWorkout && freshWorkout.id) {
-        this.workout = freshWorkout
-        this.status = 'idle'
+        if (!this.workout || this.workout.id !== freshWorkout.id) {
+          this.workout = freshWorkout
+          this.status = 'idle'
+        }
       } else {
         this.status = 'idle'
         this.workout = null

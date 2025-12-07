@@ -32,3 +32,9 @@ Complexité estimée : Faible. (Principalement une modification de l'interface d
 Pourquoi ? Permet à l'utilisateur de contextualiser ses séances et de se souvenir de ses intentions ou de son état de forme ce jour-là.
 
 Complexité estimée : Faible. (Nécessite juste d'ajouter la colonne notes à la table workouts et les champs correspondants).
+
+6. Mettre en place cache backend
+
+7. Mettre en place cache frontend
+
+8. Fix le fait qu'on voit encore le workout à faire dans liveWorkout si on l'a déjà fait
